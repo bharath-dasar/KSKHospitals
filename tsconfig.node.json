@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS", // Ensure this for Node.js scripts
+    "target": "ESNext",   // Adjust target as per your project needs
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  },
+  "include": ["vite.config.ts"], // Add any other Node-specific files here if needed
+  // "exclude": ["node_modules", "dist"]
+}
