@@ -4,32 +4,33 @@ import Sidebar from '../components/Sidebar/index';
 
 const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const hideSidebarAndHeader = location.pathname.includes('/signin') ||location.pathname.includes('/signup');
 
   return (
-    <div className="dark:bg-boxdark-2 dark:text-bodydark">
-      {/* <!-- ===== Page Wrapper Start ===== --> */}
-      <div className="flex h-screen overflow-hidden">
-        {/* <!-- ===== Sidebar Start ===== --> */}
+    <div className="dark:bg-boxdark-2 dark:text-bodydark ">
+
+        {!hideSidebarAndHeader?
+        (      <div className="flex h-screen overflow-hidden">
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        {/* <!-- ===== Sidebar End ===== --> */}
-
-        {/* <!-- ===== Content Area Start ===== --> */}
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          {/* <!-- ===== Header Start ===== --> */}
           <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-          {/* <!-- ===== Header End ===== --> */}
-
-          {/* <!-- ===== Main Content Start ===== --> */}
           <main>
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
               {children}
             </div>
           </main>
-          {/* <!-- ===== Main Content End ===== --> */}
         </div>
-        {/* <!-- ===== Content Area End ===== --> */}
-      </div>
-      {/* <!-- ===== Page Wrapper End ===== --> */}
+        </div>):
+        (<div className='absolute top-0 left-0 w-screen h-screen flex items-center justify-center'>
+          <main>
+            <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+              {children}
+            </div>
+          </main>
+        </div>
+        )
+        }
+
     </div>
   );
 };

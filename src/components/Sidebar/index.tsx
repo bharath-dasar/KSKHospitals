@@ -603,8 +603,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 }}
               </SidebarLinkGroup>
               {/* <!-- Menu Item Ui Elements --> */}
-
-              {/* <!-- Menu Item Auth Pages --> */}
+          <div>
+              {/* <!-- Menu Item Auth Pages --> 
               <SidebarLinkGroup
                 activeCondition={
                   pathname === '/auth' || pathname.includes('auth')
@@ -674,7 +674,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           />
                         </svg>
                       </NavLink>
-                      {/* <!-- Dropdown Menu Start --> */}
+                      
                       <div
                         className={`translate transform overflow-hidden ${
                           !open && 'hidden'
@@ -705,12 +705,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                         </ul>
                       </div>
-                      {/* <!-- Dropdown Menu End --> */}
                     </React.Fragment>
                   );
                 }}
               </SidebarLinkGroup>
-              {/* <!-- Menu Item Auth Pages --> */}
+            <!-- Menu Item Auth Pages --> */}
+          </div>
             </ul>
           </div>
         </nav>

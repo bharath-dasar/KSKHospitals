@@ -1,0 +1,7 @@
+# Node modules
+node_modules/
+
+# Other entries can go here
+dist/
+build/
+.env
