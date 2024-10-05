@@ -70,14 +70,14 @@ const SignIn: React.FC = () => {
                 />
               </div>
 
-              <div className="mt-6 text-center">
+              {/* <div className="mt-6 text-center">
                 <p>
                   Don’t have an account?{' '}
                   <Link to="/auth/signup" className="text-primary">
                     Sign Up
                   </Link>
                 </p>
-              </div>
+              </div> */}
             </form>
           </div>
         </div>
