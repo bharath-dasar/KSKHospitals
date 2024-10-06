@@ -12,10 +12,12 @@ import FormElements from './pages/Form/FormElements';
 import FormLayout from './pages/Form/FormLayout';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import CreateUser from './pages/CreateUser';
 import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
+import List from './pages/List';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -94,11 +96,29 @@ function App() {
           }
         />
         <Route
+          path="/list"
+          element={
+            <>
+              <PageTitle title="Tables " />
+              <List />
+            </>
+          }
+        />
+        <Route
           path="/settings"
           element={
             <>
               <PageTitle title="Settings " />
               <Settings />
+            </>
+          }
+        />
+        <Route
+          path="/createUser"
+          element={
+            <>
+              <PageTitle title="Settings " />
+              <CreateUser />
             </>
           }
         />
