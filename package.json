@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy" : "npm run dev",
+    "deploy" : "gh-pages -d build"
   },
   "author": {
     "name": "TailAdmin",
@@ -39,6 +41,7 @@
     "@vitejs/plugin-react": "^4.0.3",
     "autoprefixer": "^10.4.14",
     "file-loader": "^6.2.0",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.4.27",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.4.1",

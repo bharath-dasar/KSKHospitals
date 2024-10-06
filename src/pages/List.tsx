@@ -21,7 +21,7 @@ const rows = [
   { id: 15, lastName: 'Baelish', firstName: 'Petyr', age: 42 },
 ];
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 10;
 
 export default function List() {
   const [currentPage, setCurrentPage] = useState(1);
