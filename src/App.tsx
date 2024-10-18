@@ -63,8 +63,8 @@ function App() {
           path="/profile"
           element={
             <>
-              <PageTitle title="Profile " />
-              <Profile />
+              <PageTitle title="Profile" />
+              <Profile/>
             </>
           }
         />
