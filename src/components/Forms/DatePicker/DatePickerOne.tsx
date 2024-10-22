@@ -1,7 +1,11 @@
-import flatpickr from 'flatpickr';
 import { useEffect } from 'react';
+import flatpickr from 'flatpickr';
 
-const DatePickerOne = () => {
+type DatePickerOneProps = {
+  onDateChange: (date: string) => void;
+};
+
+const DatePickerOne = ({ onDateChange }: DatePickerOneProps) => {
   useEffect(() => {
     // Init flatpickr
     flatpickr('.form-datepicker', {
@@ -13,15 +17,17 @@ const DatePickerOne = () => {
         '<svg className="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M5.4 10.8l1.4-1.4-4-4 4-4L5.4 0 0 5.4z" /></svg>',
       nextArrow:
         '<svg className="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M1.4 10.8L0 9.4l4-4-4-4L1.4 0l5.4 5.4z" /></svg>',
+      onChange: (selectedDates, dateStr) => {
+        // Trigger the callback with the selected date
+        onDateChange(dateStr);
+      },
     });
-
-    
-  }, []);
+  }, [onDateChange]);
 
   return (
     <div>
       <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-        Date picker
+        Date of Birth
       </label>
       <div className="relative">
         <input
@@ -29,7 +35,6 @@ const DatePickerOne = () => {
           placeholder="mm/dd/yyyy"
           data-class="flatpickr-right"
         />
-
         <div className="pointer-events-none absolute inset-0 left-auto right-5 flex items-center">
           <svg
             width="18"

@@ -185,7 +185,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 (isActive && '!text-white')
                               }
                             >
-                              All Users
+                              All Staff
                             </NavLink>
                           </li>
                         </ul>

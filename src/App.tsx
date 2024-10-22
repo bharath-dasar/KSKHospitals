@@ -11,7 +11,7 @@ import ECommerce from './pages/Dashboard/ECommerce';
 import FormElements from './pages/Form/FormElements';
 import FormLayout from './pages/Form/FormLayout';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
+import Settings from './pages/PatientForm';
 import CreateUser from './pages/CreateUser';
 import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
