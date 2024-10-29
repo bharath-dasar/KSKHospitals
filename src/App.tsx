@@ -12,12 +12,15 @@ import FormElements from './pages/Form/FormElements';
 import FormLayout from './pages/Form/FormLayout';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
-import CreateUser from './pages/CreateUser';
+import CreateUser from './pages/CreatePatient';
 import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
 import List from './pages/List';
+import UserList from './components/Tables/UserList';
+import ClientList from './components/Tables/ClientList';
+import CreatePatient from './pages/CreatePatient';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -105,11 +108,47 @@ function App() {
           }
         />
         <Route
+          path="/userList"
+          element={
+            <>
+              <PageTitle title="Users" />
+              <UserList />
+            </>
+          }
+        />
+        <Route
+          path="/clientList"
+          element={
+            <>
+              <PageTitle title="Clients" />
+              <ClientList />
+            </>
+          }
+        />
+        <Route
+          path="/doctorsList"
+          element={
+            <>
+              <PageTitle title="Doctors" />
+              <UserList />
+            </>
+          }
+        />
+        <Route
           path="/settings"
           element={
             <>
               <PageTitle title="Settings " />
               <Settings />
+            </>
+          }
+        />
+        <Route
+          path="/createPatient"
+          element={
+            <>
+              <PageTitle title="Settings " />
+              <CreatePatient />
             </>
           }
         />

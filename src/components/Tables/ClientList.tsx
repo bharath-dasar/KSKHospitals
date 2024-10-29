@@ -1,54 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState, useEffect } from 'react';
+import { Button } from 'antd';
 import axios from 'axios';
-import { Package } from '../../types/package'; // Import the correct type
+import { PackagePatient } from '../../types/package'; 
+import { useNavigate } from 'react-router-dom';
 
-const UserList = () => {
-  // Explicitly define the type of packageData
-  const [packageData, setPackageData] = useState<Package[]>([]);
+const ClientList = () => {
+  const [packageData, setPackageData] = useState<PackagePatient[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 10;
+  const pageSize = 8;
 
-  // Fetch data from API
+  const navigate = useNavigate(); 
+
   useEffect(() => {
     const fetchPackageData = async () => {
       try {
         const response = await axios.get('/api/userlist'); // Replace with your API URL
-        const data: Package[] = response.data;
-        setPackageData(data);
-        setTotalPages(Math.ceil(data.length / pageSize)); // Calculate total pages
-      } catch (error) {
-
-        //to be removed
-        const data: Package[] = [
-          { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-          { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-          { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-          { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-          { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: 1 },
-          { id: 6, lastName: 'Melisandre', firstName: 'A', age: 150 },
-          { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-          { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-          { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-          { id: 10, lastName: 'Baratheon', firstName: 'Robert', age: 40 },
-          { id: 11, lastName: 'Tyrell', firstName: 'Margaery', age: 24 },
-          { id: 12, lastName: 'Greyjoy', firstName: 'Theon', age: 30 },
-          { id: 13, lastName: 'Bolton', firstName: 'Ramsay', age: 27 },
-          { id: 14, lastName: 'Martell', firstName: 'Oberyn', age: 38 },
-          { id: 15, lastName: 'Baelish', firstName: 'Petyr', age: 42 },
-        ];
+        const data: PackagePatient[] = response.data;
         setPackageData(data);
         setTotalPages(Math.ceil(data.length / pageSize));
+      } catch (error) {
         console.error('Error fetching package data:', error);
+        // Fallback data for testing
+        const fallbackData: PackagePatient[] = [
+          // Example data, replace with actual structure
+          { id: 1, fullName: 'Jon Snow', age: 35, phoneNumber: '123-456-7890', email: 'jon@example.com', dob: '1989-01-01' },
+          { id: 2, fullName: 'Cersei Lannister', age: 42, phoneNumber: '123-456-7891', email: 'cersei@example.com', dob: '1982-01-01' },
+          { id: 3, fullName: 'Jaime Lannister', age: 45, phoneNumber: '123-456-7892', email: 'jaime@example.com', dob: '1979-01-01' },
+          { id: 4, fullName: 'Arya Stark', age: 16, phoneNumber: '123-456-7893', email: 'arya@example.com', dob: '2008-01-01' },
+          // Add more fallback data as needed
+        ];
+        setPackageData(fallbackData);
+        setTotalPages(Math.ceil(fallbackData.length / pageSize));
       }
     };
 
     fetchPackageData();
   }, []);
 
-  // Get paginated data
   const paginatedData = packageData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
@@ -58,90 +47,79 @@ const UserList = () => {
     setCurrentPage(page);
   };
 
-  return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[20px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Id
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                Last name
-              </th>
-              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                First Name
-              </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Age
-              </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.map((packageItem, key) => (
-              <tr key={key}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {packageItem.id}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {packageItem.firstName}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {packageItem.lastName}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {packageItem.age}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <div className="flex items-center space-x-3.5">
-                    <button className="hover:text-primary">
-                      <RemoveRedEyeIcon />
-                    </button>
-                    <button className="hover:text-primary">
-                      <DeleteIcon />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  const redirectToCreatePatient = () => {
+    navigate('/createPatient'); 
+  };
 
-        {/* Pagination Controls */}
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`py-2 px-4 ${currentPage === 1 ? 'opacity-50' : ''}`}
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`py-2 px-4 ${currentPage === totalPages ? 'opacity-50' : ''}`}
-          >
-            Next
-          </button>
+  return (
+    <div>
+      <div className="flex justify-end py-4">
+        <Button
+          type="primary"
+          onClick={redirectToCreatePatient}
+          className="inline-flex items-center justify-center bg-primary py-2 px-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-4"
+        >
+          Create Patient
+        </Button>
+      </div>
+
+      <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        <div className="max-w-full overflow-x-auto">
+          <table className="w-full table-auto">
+            <thead>
+              <tr className="bg-gray-2 text-left dark:bg-meta-4">
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Full Name</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Age</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Phone Number</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Email</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">DOB</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.map((packageItem, key) => (
+                <tr key={key}>
+                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                    <p className="font-medium text-black dark:text-white">{packageItem.fullName}</p>
+                  </td>
+                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                    <p className="text-black dark:text-white">{packageItem.age}</p>
+                  </td>
+                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                    <p className="text-black dark:text-white">{packageItem.phoneNumber}</p>
+                  </td>
+                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                    <p className="text-black dark:text-white">{packageItem.email}</p>
+                  </td>
+                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                    <p className="text-black dark:text-white">{packageItem.dob}</p>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Pagination Controls */}
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`py-2 px-4 ${currentPage === 1 ? 'opacity-50' : ''}`}
+            >
+              Previous
+            </button>
+            <span>Page {currentPage} of {totalPages}</span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`py-2 px-4 ${currentPage === totalPages ? 'opacity-50' : ''}`}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default UserList;
+export default ClientList;
