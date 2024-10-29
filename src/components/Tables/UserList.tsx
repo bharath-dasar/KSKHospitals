@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal } from 'antd';
+import { Modal } from 'antd';
 import axios from 'axios';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Package } from '../../types/package'; 
+// import { useEffect, useState } from 'react';
+// import DeleteIcon from '@mui/icons-material/Delete';
+// import axios from 'axios';
+// import { Package } from '../../types/package';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+// import { Modal } from 'antd';
 
 const UserList = () => {
-  // Explicitly define the type of packageData
   const [packageData, setPackageData] = useState<Package[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -27,6 +31,19 @@ const UserList = () => {
   });
 
   // Fetch data from API
+  // Modal handlers
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
   useEffect(() => {
     const fetchPackageData = async () => {
       try {
@@ -62,7 +79,6 @@ const UserList = () => {
     fetchPackageData();
   }, []);
 
-  // Get paginated data
   const paginatedData = packageData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
@@ -73,37 +89,35 @@ const UserList = () => {
   };
 
   // Modal handlers
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
+  // const showModal = () => {
+  //   setIsModalOpen(true);
+  // };
 
-  const handleOk = () => {
-    // Handle form submission logic here (e.g., sending data to the backend)
-    console.log('Form Data:', formData);
-    setIsModalOpen(false);
-  };
+  // const handleOk = () => {
+  //   // Handle form submission logic here (e.g., sending data to the backend)
+  //   console.log('Form Data:', formData);
+  //   setIsModalOpen(false);
+  // };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+  // const handleCancel = () => {
+  //   setIsModalOpen(false);
+  // };
 
   // Input change handler
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   setFormData({ ...formData, [name]: value });
+  // };
 
   return (
     <div>
-      {/* Create User button that opens the modal */}
-      <div className="flex justify-end py-4">
-        <Button
-          type="primary"
+      <div className="flex justify-end py-4 min-h-11">
+        <button
           onClick={showModal}
-          className="inline-flex items-center justify-center bg-primary py-2 px-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-4"
+          className="inline-flex items-center justify-center rounded-full bg-black py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
         >
           Create User
-        </Button>
+        </button>
       </div>
 
       <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -135,11 +149,14 @@ const UserList = () => {
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <div className="flex items-center space-x-3.5">
-                      <button className="hover:text-primary">
+                      {/* <button className="hover:text-primary">
                         <RemoveRedEyeIcon />
-                      </button>
+                      </button> */}
                       <button className="hover:text-primary">
                         <DeleteIcon />
+                      </button>                      
+                      <button className="hover:text-primary">
+                        <EditOutlinedIcon />
                       </button>
                     </div>
                   </td>
@@ -157,9 +174,7 @@ const UserList = () => {
             >
               Previous
             </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
+            <span>Page {currentPage} of {totalPages}</span>
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
@@ -174,92 +189,71 @@ const UserList = () => {
       {/* Modal */}
       <Modal title="Create User" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
         <div>
-          <label className="py-2 block text-black dark:text-white">
+          <label className="block text-black dark:text-white py-2">
             First Name
           </label>
           <input
             type="text"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleInputChange}
             placeholder="First Name"
-            className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            className="w-full rounded-lg border-[1px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
         </div>
         <div>
-          <label className="py-2 block text-black dark:text-white">
+          <label className="block text-black dark:text-white py-2">
             Last Name
           </label>
           <input
             type="text"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleInputChange}
             placeholder="Last Name"
             className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
         </div>
         <div>
-          <label className="py-2 block text-black dark:text-white">
+          <label className="block text-black dark:text-white py-2">
             Age
           </label>
           <input
             type="number"
-            name="age"
-            value={formData.age}
-            onChange={handleInputChange}
             placeholder="Age"
             className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
         </div>
         <div>
-          <label className="py-2 block text-black dark:text-white">
+          <label className="block text-black dark:text-white py-2">
             Email
           </label>
           <input
             type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
             placeholder="Email"
             className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
         </div>
         <div>
-          <label className="py-2 block text-black dark:text-white">
+          <label className="block text-black dark:text-white py-2">
             Phone Number
           </label>
           <input
             type="text"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleInputChange}
             placeholder="Phone Number"
             className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
         </div>
         <div>
-          <label className="py-2 block text-black dark:text-white">
+          <label className="block text-black dark:text-white py-2">
             Password
           </label>
           <input
             type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
             placeholder="Password"
             className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
         </div>
         <div>
-          <label className="py-2 block text-black dark:text-white">
+          <label className="block text-black dark:text-white py-2">
             Retype Password
           </label>
           <input
             type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
             placeholder="Retype Password"
             className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           />
