@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import { useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { Package } from '../../types/package';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import { Button, Modal } from 'antd'; // Importing Button and Modal from Ant Design
+import { Modal } from 'antd';
 
 const UserList = () => {
   const [packageData, setPackageData] = useState<Package[]>([]);
@@ -75,15 +74,13 @@ const UserList = () => {
 
   return (
     <div>
-      {/* Create User button that opens the modal */}
-      <div className="flex justify-end py-4">
-        <Button
-          type="primary"
+      <div className="flex justify-end py-4 min-h-11">
+        <button
           onClick={showModal}
-          className="inline-flex items-center justify-center bg-primary py-2 px-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-4"
+          className="inline-flex items-center justify-center rounded-full bg-black py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
         >
           Create User
-        </Button>
+        </button>
       </div>
 
       <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">

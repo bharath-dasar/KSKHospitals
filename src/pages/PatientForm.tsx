@@ -1,3 +1,4 @@
+import { message } from 'antd';
 import { useState } from 'react';
 import DatePickerOne from '../components/Forms/DatePicker/DatePickerOne';
 import SelectGroupOne from '../components/Forms/SelectGroup/SelectGroupOne';
@@ -32,15 +33,18 @@ const PatientForm = () => {
       });
       if (response.ok) {
         console.log('Patient created successfully');
+        message.success('Patient created successfully')
       } else {
         console.log('Failed to create patient');
+        message.error('Failed to create patient')
       }
     } catch (error) {
+      message.error('Error to create patient')
       console.error('Error creating patient:', error);
     }
   };
 
-  const handleCreateAppointment = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCreateAppointment = async () => {
     try {
       const response = await fetch('/api/createAppointment', {
         method: 'POST',
@@ -51,11 +55,14 @@ const PatientForm = () => {
       });
       if (response.ok) {
         console.log('Appointment created successfully');
+        message.success('Appointment created successfully');
       } else {
         console.log('Failed to create appointment');
+        message.error('Failed to create appointment');
       }
     } catch (error) {
       console.error('Error creating appointment:', error);
+      message.error('Error creating appointment');
     }
   };
 
