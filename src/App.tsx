@@ -13,7 +13,7 @@ import FormLayout from './pages/Form/FormLayout';
 import Profile from './pages/Profile';
 // import Settings from './pages/Settings';
 // import CreateUser from './pages/CreatePatient';
-import Settings from './pages/PatientForm';
+import PatientForm from './pages/PatientForm';
 import CreateUser from './pages/CreateUser';
 import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
@@ -137,11 +137,11 @@ function App() {
           }
         />
         <Route
-          path="/settings"
+          path="/patientForm"
           element={
             <>
               <PageTitle title="Settings " />
-              <Settings />
+              <PatientForm />
             </>
           }
         />

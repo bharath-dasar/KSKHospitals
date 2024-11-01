@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from 'antd';
+import { useState, useEffect } from 'react';
+import { Button, Tooltip } from 'antd';
 import axios from 'axios';
 import { PackagePatient } from '../../types/package'; 
 import { useNavigate } from 'react-router-dom';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Edit } from '@mui/icons-material';
 
 const ClientList = () => {
   const [packageData, setPackageData] = useState<PackagePatient[]>([]);
@@ -48,7 +52,7 @@ const ClientList = () => {
   };
 
   const redirectToCreatePatient = () => {
-    navigate('/createPatient'); 
+    navigate('/patientForm'); 
   };
 
   return (
@@ -73,6 +77,7 @@ const ClientList = () => {
                 <th className="py-4 px-4 font-medium text-black dark:text-white">Phone Number</th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">Email</th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">DOB</th>
+                <th className="font-medium text-black dark:text-white">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -82,7 +87,7 @@ const ClientList = () => {
                     <p className="font-medium text-black dark:text-white">{packageItem.fullName}</p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">{packageItem.age}</p>
+                    <p className="text-bla  ck dark:text-white">{packageItem.age}</p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">{packageItem.phoneNumber}</p>
@@ -93,6 +98,27 @@ const ClientList = () => {
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">{packageItem.dob}</p>
                   </td>
+                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                    <div className="flex items-center space-x-3.5">
+                      <Tooltip title="Add Appointment">
+                        <button className="hover:text-primary">
+                          <AddIcon />
+                        </button>
+                      </Tooltip>
+                      <Tooltip title="Edit Appointment">
+                        <button className="hover:text-primary">
+                          <Edit/>
+                        </button>
+                      </Tooltip>
+
+                      {/* Delete Appointment Button */}
+                      <Tooltip title="Delete Appointment">
+                        <button className="hover:text-primary">
+                          <DeleteIcon />
+                        </button>
+                      </Tooltip>
+                  </div>
+                </td>
                 </tr>
               ))}
             </tbody>

@@ -1,7 +1,14 @@
-import { message } from 'antd';
+import { AutoComplete, message } from 'antd';
 import { useState } from 'react';
 import DatePickerOne from '../components/Forms/DatePicker/DatePickerOne';
 import SelectGroupOne from '../components/Forms/SelectGroup/SelectGroupOne';
+import { Navigate, useNavigate } from 'react-router-dom';
+
+const doctors = [
+  { label: 'Dr. John Smith', value: 'Dr. John Smith' },
+  { label: 'Dr. Emily White', value: 'Dr. Emily White' },
+  { label: 'Dr. Michael Brown', value: 'Dr. Michael Brown' },
+];
 
 const PatientForm = () => {
   const [formData, setFormData] = useState({
@@ -11,8 +18,15 @@ const PatientForm = () => {
     age: '',
     dateOfBirth: '',
     medicalHistory: '',
+    time: '',
+    doctorName: '',
+    height: '',
+    weight: '',
+    symptoms: '',
   });
-
+  const [showAppointmentFields, setShowAppointmentFields] = useState(false);
+  const [filteredDoctors, setFilteredDoctors] = useState(doctors);
+  const navigate = useNavigate(); 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -34,6 +48,7 @@ const PatientForm = () => {
       if (response.ok) {
         console.log('Patient created successfully');
         message.success('Patient created successfully')
+        navigate('/clientList')
       } else {
         console.log('Failed to create patient');
         message.error('Failed to create patient')
@@ -42,6 +57,17 @@ const PatientForm = () => {
       message.error('Error to create patient')
       console.error('Error creating patient:', error);
     }
+
+  };
+
+  // Handle typeahead for Doctor's Name
+  const handleDoctorSearch = (value: string) => {
+    setFilteredDoctors(
+      doctors.filter((doctor) =>
+        doctor.value.toLowerCase().includes(value.toLowerCase())
+      )
+    );
+    setFormData({ ...formData, doctorName: value });
   };
 
   const handleCreateAppointment = async () => {
@@ -64,6 +90,13 @@ const PatientForm = () => {
       console.error('Error creating appointment:', error);
       message.error('Error creating appointment');
     }
+  };
+
+  const handleStartAppointment = async () => {
+    setShowAppointmentFields(true);
+  };
+  const handleCloseAppointment = async () => {
+    setShowAppointmentFields(false);
   };
 
   return (
@@ -89,7 +122,7 @@ const PatientForm = () => {
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 </div>
-                <div className="w-1/2 xl:w-1/2">
+                <div className="w-full xl:w-1/2">
                   <label className="mb-2.5 block text-black dark:text-white">
                     Phone Number <span className="text-meta-1">*</span>
                   </label>
@@ -102,7 +135,7 @@ const PatientForm = () => {
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 </div>
-                <div className="w-1/2 xl:w-1/2">
+                <div className="w-full xl:w-1/2">
                   <DatePickerOne onDateChange={handleDateChange} />
                 </div>
               </div>
@@ -121,7 +154,7 @@ const PatientForm = () => {
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 </div>
-                <div className="mb-4.5 w-1/2 xl:w-1/4">
+                <div className="mb-4.5 w-full xl:w-1/4">
                   <label className="mb-2.5 block text-black dark:text-white">
                     Age <span className="text-meta-1">*</span>
                   </label>
@@ -134,7 +167,7 @@ const PatientForm = () => {
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 </div>
-                <div className="mb-4.5 w-1/2 xl:w-1/4">
+                <div className="mb-4.5 w-full xl:w-1/4">
                   <SelectGroupOne />
                 </div>
               </div>
@@ -150,7 +183,92 @@ const PatientForm = () => {
                   className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 ></textarea>
               </div>
+              {showAppointmentFields && (
+            <div>
+              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/4">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Appointment Time
+                  </label>
+                  <input
+                    type="time"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleChange}
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <div className="w-full xl:w-1/4">
+                  <DatePickerOne onDateChange={handleDateChange} />
+                </div>
+                <div className="w-full xl:w-1/4">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Height (cm)
+                  </label>
+                  <input
+                    type="number"
+                    name="height"
+                    placeholder="Enter height"
+                    value={formData.height}
+                    onChange={handleChange}
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <div className="w-full xl:w-1/4">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    name="weight"
+                    placeholder="Enter weight"
+                    value={formData.weight}
+                    onChange={handleChange}
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+              </div>
+              <div className="mb-4.5 flex flex-col xl:flex-row">
+              <div className="w-full xl:w-full">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Doctor's Name
+                  </label>
+                  <AutoComplete
+                    className="w-full  border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    options={filteredDoctors}
+                    style={{ width: '100%',height: '85%' }}
+                    onSearch={handleDoctorSearch}
+                    onSelect={(value) => setFormData({ ...formData, doctorName: value })}
+                    placeholder="Select doctor's name"
+                    value={formData.doctorName}
+                  />
 
+                </div>
+              </div>
+              <div className="mb-6">
+                <label className="mb-2.5 block text-black dark:text-white">Symptoms</label>
+                <textarea
+                  name="symptoms"
+                  rows={4}
+                  placeholder="Describe symptoms"
+                  value={formData.symptoms}
+                  onChange={handleChange}
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                ></textarea>
+              </div>
+              <div className="mb-6">
+              <button
+                  type="button"
+                  onClick={handleCreateAppointment}
+                  className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                >
+                  Schedule Appointment
+                </button>
+              </div>
+
+            </div>
+              
+          )}
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <button
                   type="submit"
@@ -158,13 +276,22 @@ const PatientForm = () => {
                 >
                   Create Patient
                 </button>
+                {!showAppointmentFields && (
                 <button
                   type="button"
-                  onClick={handleCreateAppointment}
+                  onClick={handleStartAppointment}
                   className="flex w-1/2 justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
                 >
-                  Create Appointment
-                </button>
+                  Start Appointment
+                </button>)}
+                {showAppointmentFields && (
+                <button
+                  type="button"
+                  onClick={handleCloseAppointment}
+                  className="flex w-1/2 justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                >
+                  Close Appointment
+                </button>)}
               </div>
             </div>
           </form>
