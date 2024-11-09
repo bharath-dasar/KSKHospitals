@@ -22,7 +22,10 @@ import DefaultLayout from './layout/DefaultLayout';
 import List from './pages/List';
 import UserList from './components/Tables/UserList';
 import ClientList from './components/Tables/ClientList';
+import DoctorList from './components/Tables/DoctorList';
 import CreatePatient from './pages/CreatePatient';
+import DoctorForm from './pages/DoctorForm';
+import Appointments from './components/Tables/Appointments';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -132,7 +135,7 @@ function App() {
           element={
             <>
               <PageTitle title="Doctors" />
-              <UserList />
+              <DoctorList />
             </>
           }
         />
@@ -140,8 +143,17 @@ function App() {
           path="/patientForm"
           element={
             <>
-              <PageTitle title="Settings " />
+              <PageTitle title="patientForm " />
               <PatientForm />
+            </>
+          }
+        />
+        <Route
+          path="/appointments"
+          element={
+            <>
+              <PageTitle title="doctorForm " />
+              <Appointments />
             </>
           }
         />

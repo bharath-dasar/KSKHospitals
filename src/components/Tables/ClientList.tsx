@@ -1,25 +1,76 @@
 import { useState, useEffect } from 'react';
-import { Button, Tooltip } from 'antd';
+import { AutoComplete, Button, Modal, Tooltip } from 'antd';
 import axios from 'axios';
 import { PackagePatient } from '../../types/package'; 
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Edit } from '@mui/icons-material';
+import DatePickerOne from '../Forms/DatePicker/DatePickerOne';
+
+const doctors = [
+  { label: 'Dr. John Smith', value: 'Dr. John Smith' },
+  { label: 'Dr. Emily White', value: 'Dr. Emily White' },
+  { label: 'Dr. Michael Brown', value: 'Dr. Michael Brown' },
+];
 
 const ClientList = () => {
   const [packageData, setPackageData] = useState<PackagePatient[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [filteredDoctors, setFilteredDoctors] = useState(doctors);
+   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
 
   const navigate = useNavigate(); 
+  
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phoneNumber: '',
+    email: '',
+    age: '',
+    dateOfBirth: '',
+    medicalHistory: '',
+    time: '',
+    doctorName: '',
+    height: '',
+    weight: '',
+    symptoms: '',
+  });
+
+    // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Modal handlers
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleDateChange = (date: string) => {
+    setFormData({ ...formData, dateOfBirth: date });
+  };
+  const handleOk = () => {
+    // Handle form submission logic here (e.g., sending data to the backend)
+    console.log('Form Data:', formData);
+    setIsModalOpen(false);
+  };
+  const handleDoctorSearch = (value: string) => {
+    setFilteredDoctors(
+      doctors.filter((doctor) =>
+        doctor.value.toLowerCase().includes(value.toLowerCase())
+      )
+    );
+    setFormData({ ...formData, doctorName: value });
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+    // Input change handler
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
   useEffect(() => {
     const fetchPackageData = async () => {
       try {
-        const response = await axios.get('/api/userlist'); // Replace with your API URL
+        const response = await axios.get('/api/clientlist'); // Replace with your API URL
         const data: PackagePatient[] = response.data;
         setPackageData(data);
         setTotalPages(Math.ceil(data.length / pageSize));
@@ -101,19 +152,24 @@ const ClientList = () => {
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <div className="flex items-center space-x-3.5">
                       <Tooltip title="Add Appointment">
-                        <button className="hover:text-primary">
+                        <button 
+                        className="hover:text-primary"
+                        onClick={showModal}>
                           <AddIcon />
                         </button>
                       </Tooltip>
-                      <Tooltip title="Edit Appointment">
+                      <Tooltip title="Edit Patient">
                         <button className="hover:text-primary">
                           <Edit/>
                         </button>
                       </Tooltip>
 
                       {/* Delete Appointment Button */}
-                      <Tooltip title="Delete Appointment">
-                        <button className="hover:text-primary">
+                      {/* permission based button */}
+                      <Tooltip title="Delete Patient">
+                        <button 
+                        className="hover:text-primary"
+                        >
                           <DeleteIcon />
                         </button>
                       </Tooltip>
@@ -144,6 +200,94 @@ const ClientList = () => {
           </div>
         </div>
       </div>
+      {/* Modal */}
+      <Modal title="Create User" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+            <div>
+              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Height (cm)
+                  </label>
+                  <input
+                    type="number"
+                    name="height"
+                    placeholder="Enter height"
+                    value={formData.height}
+                    onChange={handleChange}
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    name="weight"
+                    placeholder="Enter weight"
+                    value={formData.weight}
+                    onChange={handleChange}
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+              </div>
+              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/2">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Appointment Time
+                  </label>
+                  <input
+                    type="time"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleChange}
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <div className="w-full xl:w-1/2">
+                  <DatePickerOne onDateChange={handleDateChange} />
+                </div>
+              </div>
+              <div className="mb-4.5 flex flex-col xl:flex-row">
+              <div className="w-full xl:w-full">
+                  <label className=" block text-black dark:text-white">
+                    Doctor's Name
+                  </label>
+                  <AutoComplete
+                    className="w-full  border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    options={filteredDoctors}
+                    style={{ width: '100%',height: '85%' }}
+                    onSearch={handleDoctorSearch}
+                    onSelect={(value) => setFormData({ ...formData, doctorName: value })}
+                    placeholder="Select doctor's name"
+                    value={formData.doctorName}
+                  />
+
+                </div>
+              </div>
+              <div className="mb-6">
+                <label className="mb-2.5 block text-black dark:text-white">Symptoms</label>
+                <textarea
+                  name="symptoms"
+                  rows={4}
+                  placeholder="Describe symptoms"
+                  value={formData.symptoms}
+                  onChange={handleChange}
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                ></textarea>
+              </div>
+              <div className="mb-6">
+              <button
+                  type="button"
+                  // onClick={handleCreateAppointment}
+                  className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                >
+                  Schedule Appointment
+                </button>
+              </div>
+
+            </div>
+      </Modal>
     </div>
   );
 };

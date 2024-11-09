@@ -5,6 +5,8 @@ import Logos from '../../images/logo/logo.png';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined';
 import AirlineSeatIndividualSuiteIcon from '@mui/icons-material/AirlineSeatIndividualSuite';
+import ContactEmergencyOutlinedIcon from '@mui/icons-material/ContactEmergencyOutlined';
+import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -143,6 +145,32 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 >
                 <AirlineSeatIndividualSuiteIcon/>
                 Patients
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/doctorsList"
+                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                    (pathname === '/' ||
+                      pathname.includes('doctorList')) &&
+                    'bg-graydark dark:bg-meta-4'
+                  }`}
+                >
+                <ContactEmergencyOutlinedIcon/>
+                Doctor
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/appointments"
+                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                    (pathname === '/' ||
+                      pathname.includes('appointments')) &&
+                    'bg-graydark dark:bg-meta-4'
+                  }`}
+                >
+                <EditCalendarOutlinedIcon/>
+                Appointments
                 </NavLink>
               </li>
               <SidebarLinkGroup

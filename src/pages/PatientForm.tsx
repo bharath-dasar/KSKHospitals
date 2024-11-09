@@ -272,7 +272,7 @@ const PatientForm = () => {
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <button
                   type="submit"
-                  className="flex w-1/2 justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
                 >
                   Create Patient
                 </button>
@@ -280,7 +280,7 @@ const PatientForm = () => {
                 <button
                   type="button"
                   onClick={handleStartAppointment}
-                  className="flex w-1/2 justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
                 >
                   Start Appointment
                 </button>)}
@@ -288,7 +288,7 @@ const PatientForm = () => {
                 <button
                   type="button"
                   onClick={handleCloseAppointment}
-                  className="flex w-1/2 justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
                 >
                   Close Appointment
                 </button>)}
