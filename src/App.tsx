@@ -152,8 +152,17 @@ function App() {
           path="/appointments"
           element={
             <>
-              <PageTitle title="doctorForm " />
+              <PageTitle title="appointments" />
               <Appointments />
+            </>
+          }
+        />
+        <Route
+          path="/doctorForm"
+          element={
+            <>
+              <PageTitle title="doctorForm " />
+              <DoctorForm />
             </>
           }
         />
@@ -163,6 +172,15 @@ function App() {
             <>
               <PageTitle title="Settings " />
               <CreatePatient />
+            </>
+          }
+        />
+        <Route
+          path="/createUser"
+          element={
+            <>
+              <PageTitle title="Settings " />
+              <CreateUser />
             </>
           }
         />

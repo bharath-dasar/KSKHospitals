@@ -87,7 +87,7 @@ const DoctorForm = () => {
                 </div>
               </div>
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-full">
+                <div className="w-full xl:w-1/2">
                   <label className=" block text-black dark:text-white">
                     Specialization <span className="text-meta-1">*</span>
                   </label>
