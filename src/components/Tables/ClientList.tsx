@@ -7,6 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Edit } from '@mui/icons-material';
 import DatePickerOne from '../Forms/DatePicker/DatePickerOne';
+import DOB from '../Forms/DatePicker/DOB';
 
 const doctors = [
   { label: 'Dr. John Smith', value: 'Dr. John Smith' },
@@ -201,7 +202,7 @@ const ClientList = () => {
         </div>
       </div>
       {/* Modal */}
-      <Modal title="Create User" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+      <Modal title="Create Appointment" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
             <div>
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-1/2">
@@ -245,7 +246,7 @@ const ClientList = () => {
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <DatePickerOne onDateChange={handleDateChange} />
+                  <DOB onDateChange={handleDateChange} />
                 </div>
               </div>
               <div className="mb-4.5 flex flex-col xl:flex-row">

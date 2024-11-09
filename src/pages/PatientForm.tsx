@@ -1,8 +1,8 @@
 import { AutoComplete, message } from 'antd';
 import { useState } from 'react';
-import DatePickerOne from '../components/Forms/DatePicker/DatePickerOne';
 import SelectGroupOne from '../components/Forms/SelectGroup/SelectGroupOne';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import DOB from '../components/Forms/DatePicker/DOB';
 
 const doctors = [
   { label: 'Dr. John Smith', value: 'Dr. John Smith' },
@@ -136,7 +136,7 @@ const PatientForm = () => {
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <DatePickerOne onDateChange={handleDateChange} />
+                  <DOB onDateChange={handleDateChange} />
                 </div>
               </div>
 
@@ -199,7 +199,7 @@ const PatientForm = () => {
                   />
                 </div>
                 <div className="w-full xl:w-1/4">
-                  <DatePickerOne onDateChange={handleDateChange} />
+                  <DOB onDateChange={handleDateChange} />
                 </div>
                 <div className="w-full xl:w-1/4">
                   <label className="mb-2.5 block text-black dark:text-white">
