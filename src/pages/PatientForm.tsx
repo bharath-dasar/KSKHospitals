@@ -176,7 +176,7 @@ const PatientForm = () => {
                 <div className="mb-4.5 w-full xl:w-1/4">
                   <SelectGroupOne />
                 </div>
-                <div className="mb-4.5 w-full xl:w-1/4">
+                <div className="mb-4.5 py-8.5 w-full xl:w-1/4">
                 {!showDetailsFields && (<button
                     type="button"
                     onClick={handleAddMoreDetails}
@@ -198,67 +198,7 @@ const PatientForm = () => {
                   className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 ></textarea>
               </div>
-              {showAppointmentFields && (
-            <div>
-              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/4">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Appointment Time
-                  </label>
-                  <input
-                    type="time"
-                    name="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-                <div className="w-full xl:w-1/4">
-                  <DOB onDateChange={handleDateChange} />
-                </div>
-              </div>
-              <div className="mb-4.5 flex flex-col xl:flex-row">
-              <div className="w-full xl:w-full">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Doctor's Name
-                  </label>
-                  <AutoComplete
-                    className="w-full  border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    options={filteredDoctors}
-                    style={{ width: '100%',height: '85%' }}
-                    onSearch={handleDoctorSearch}
-                    onSelect={(value) => setFormData({ ...formData, doctorName: value })}
-                    placeholder="Select doctor's name"
-                    value={formData.doctorName}
-                  />
-
-                </div>
-              </div>
-              <div className="mb-6">
-                <label className="mb-2.5 block text-black dark:text-white">Symptoms</label>
-                <textarea
-                  name="symptoms"
-                  rows={4}
-                  placeholder="Describe symptoms"
-                  value={formData.symptoms}
-                  onChange={handleChange}
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                ></textarea>
-              </div>
-              <div className="mb-6">
-              <button
-                  type="button"
-                  onClick={handleCreateAppointment}
-                  className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-                >
-                  Schedule Appointment
-                </button>
-              </div>
-
-            </div>
               
-          )}
-
           {/* Additional Fields */}
           {showDetailsFields && (
           <div className="mt-6">
@@ -413,8 +353,68 @@ const PatientForm = () => {
             </div>
           </div>
         )}
+              {showAppointmentFields && (
+            <div>
+              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/4">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Appointment Time
+                  </label>
+                  <input
+                    type="time"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleChange}
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <div className="w-full xl:w-1/4">
+                  <DOB onDateChange={handleDateChange} />
+                </div>
+              </div>
+              <div className="mb-4.5 flex flex-col xl:flex-row">
+              <div className="w-full xl:w-full">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Doctor's Name
+                  </label>
+                  <AutoComplete
+                    className="w-full  border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    options={filteredDoctors}
+                    style={{ width: '100%',height: '85%' }}
+                    onSearch={handleDoctorSearch}
+                    onSelect={(value) => setFormData({ ...formData, doctorName: value })}
+                    placeholder="Select doctor's name"
+                    value={formData.doctorName}
+                  />
+
+                </div>
+              </div>
+              <div className="mb-6">
+                <label className="mb-2.5 block text-black dark:text-white">Symptoms</label>
+                <textarea
+                  name="symptoms"
+                  rows={4}
+                  placeholder="Describe symptoms"
+                  value={formData.symptoms}
+                  onChange={handleChange}
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                ></textarea>
+              </div>
+              <div className="mb-6">
+              <button
+                  type="button"
+                  onClick={handleCreateAppointment}
+                  className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                >
+                  Schedule Appointment
+                </button>
+              </div>
+
+            </div>
+              
+          )}
         
-        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">\
+        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                   {showDetailsFields && (<button
                     type="button"
                     onClick={handleHideMoreDetails}
