@@ -125,7 +125,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <NavLink
                   to="/userList"
                   className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    (pathname === '/' ||
+                    (pathname === '/userList' ||
                       pathname.includes('userList')) &&
                     'bg-graydark dark:bg-meta-4'
                   }`}
@@ -138,7 +138,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <NavLink
                   to="/clientList"
                   className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    (pathname === '/' ||
+                    (pathname === '/clientList' ||
                       pathname.includes('clientList')) &&
                     'bg-graydark dark:bg-meta-4'
                   }`}
@@ -151,7 +151,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <NavLink
                   to="/doctorsList"
                   className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    (pathname === '/' ||
+                    (pathname === '/doctorsList' ||
                       pathname.includes('doctorList')) &&
                     'bg-graydark dark:bg-meta-4'
                   }`}
@@ -164,7 +164,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 <NavLink
                   to="/appointments"
                   className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    (pathname === '/' ||
+                    (pathname === '/appointments' ||
                       pathname.includes('appointments')) &&
                     'bg-graydark dark:bg-meta-4'
                   }`}

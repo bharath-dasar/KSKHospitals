@@ -20,11 +20,23 @@ const PatientForm = () => {
     medicalHistory: '',
     time: '',
     doctorName: '',
+    symptoms: '',
     height: '',
     weight: '',
-    symptoms: '',
+    bloodPressure: '',
+    pulse: '',
+    randomBloodSugar: '',
+    bmi: '',
+    bodyFat: '',
+    visceralFat: '',
+    skeletalMuscle: '',
+    boneMass: '',
+    bmr: '',
+    bodyWater: '',
+    bodyTemperature: '',
   });
   const [showAppointmentFields, setShowAppointmentFields] = useState(false);
+  const [showDetailsFields ,setShowDetailsFields] = useState(false);
   const [filteredDoctors, setFilteredDoctors] = useState(doctors);
   const navigate = useNavigate(); 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -99,6 +111,13 @@ const PatientForm = () => {
     setShowAppointmentFields(false);
   };
 
+  const handleAddMoreDetails = async () => {
+    setShowDetailsFields(true);
+  };
+  const handleHideMoreDetails = async () => {
+    setShowDetailsFields(false);
+  };
+
   return (
     <div className="sm:grid-cols-2">
       <div className="flex flex-col gap-9">
@@ -155,25 +174,21 @@ const PatientForm = () => {
                   />
                 </div>
                 <div className="mb-4.5 w-full xl:w-1/4">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Age <span className="text-meta-1">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="age"
-                    placeholder="Enter your age"
-                    value={formData.age}
-                    onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
+                  <SelectGroupOne />
                 </div>
                 <div className="mb-4.5 w-full xl:w-1/4">
-                  <SelectGroupOne />
+                {!showDetailsFields && (<button
+                    type="button"
+                    onClick={handleAddMoreDetails}
+                    className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  >
+                    Add More Patient Details
+                  </button>)}
                 </div>
               </div>
 
               <div className="mb-6">
-                <label className="mb-2.5 block text-black dark:text-white">Previous Medical History</label>
+                <label className="mb-2.5 block text-black dark:text-white">Previous Medical History / Remarks</label>
                 <textarea
                   name="medicalHistory"
                   rows={6}
@@ -200,32 +215,6 @@ const PatientForm = () => {
                 </div>
                 <div className="w-full xl:w-1/4">
                   <DOB onDateChange={handleDateChange} />
-                </div>
-                <div className="w-full xl:w-1/4">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Height (cm)
-                  </label>
-                  <input
-                    type="number"
-                    name="height"
-                    placeholder="Enter height"
-                    value={formData.height}
-                    onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-                <div className="w-full xl:w-1/4">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Weight (kg)
-                  </label>
-                  <input
-                    type="number"
-                    name="weight"
-                    placeholder="Enter weight"
-                    value={formData.weight}
-                    onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
                 </div>
               </div>
               <div className="mb-4.5 flex flex-col xl:flex-row">
@@ -269,7 +258,170 @@ const PatientForm = () => {
             </div>
               
           )}
-              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+
+          {/* Additional Fields */}
+          {showDetailsFields && (
+          <div className="mt-6">
+            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+              <div className="w-full xl:w-1/3">
+                <label className="mb-2.5 block text-black dark:text-white">Height (cm)</label>
+                <input
+                  type="number"
+                  name="height"
+                  value={formData.height}
+                  onChange={handleChange}
+                  placeholder="Enter height"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/3">
+                <label className="mb-2.5 block text-black dark:text-white">Weight (kg)</label>
+                <input
+                  type="number"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleChange}
+                  placeholder="Enter weight"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/3">
+                <label className="mb-2.5 block text-black dark:text-white">Blood Pressure</label>
+                <input
+                  type="text"
+                  name="bloodPressure"
+                  value={formData.bloodPressure}
+                  onChange={handleChange}
+                  placeholder="e.g., 120/80"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+            </div>
+            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">Pulse (bpm)</label>
+                <input
+                  type="number"
+                  name="pulse"
+                  value={formData.pulse}
+                  onChange={handleChange}
+                  placeholder="Enter pulse"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">RBS (mg/dL)</label>
+                <input
+                  type="number"
+                  name="randomBloodSugar"
+                  value={formData.randomBloodSugar}
+                  onChange={handleChange}
+                  placeholder="Enter RBS"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">BMI</label>
+                <input
+                  type="number"
+                  name="bmi"
+                  value={formData.bmi}
+                  onChange={handleChange}
+                  placeholder="Enter BMI"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">Body Water</label>
+                <input
+                  type="number"
+                  name="bodyWater"
+                  value={formData.bodyWater}
+                  onChange={handleChange}
+                  placeholder="Enter Body Water"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">Body Temperature</label>
+                <input
+                  type="number"
+                  name="bodyTemperature"
+                  value={formData.bodyTemperature}
+                  onChange={handleChange}
+                  placeholder="Enter Body Temperature"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+            </div>
+            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">Body Fat</label>
+                <input
+                  type="number"
+                  name="bodyFat"
+                  value={formData.bodyFat}
+                  onChange={handleChange}
+                  placeholder="Enter Body Fat"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">Visceral Fat(%)</label>
+                <input
+                  type="number"
+                  name="visceralFat"
+                  value={formData.visceralFat}
+                  onChange={handleChange}
+                  placeholder="Enter Visceral Fat percentage"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">Skeletal Muscle(%)</label>
+                <input
+                  type="number"
+                  name="skeletalMuscle"
+                  value={formData.bmi}
+                  onChange={handleChange}
+                  placeholder="Enter Skeletal Muscle percentage"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">Bone Mass</label>
+                <input
+                  type="number"
+                  name="boneMass"
+                  value={formData.boneMass}
+                  onChange={handleChange}
+                  placeholder="Enter Bone Mass"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+              <div className="w-full xl:w-1/5">
+                <label className="mb-2.5 block text-black dark:text-white">Basal Metabolic Rate in kcal/day</label>
+                <input
+                  type="number"
+                  name="bmr"
+                  value={formData.bmr}
+                  onChange={handleChange}
+                  placeholder="Enter BMR"
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">\
+                  {showDetailsFields && (<button
+                    type="button"
+                    onClick={handleHideMoreDetails}
+                    className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                  >
+                    Hide Patient Details
+                  </button>)}
                 <button
                   type="submit"
                   className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
