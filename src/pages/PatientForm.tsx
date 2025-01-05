@@ -17,6 +17,7 @@ const PatientForm = () => {
     email: '',
     age: '',
     dateOfBirth: '',
+    address: '',
     medicalHistory: '',
     time: '',
     doctorName: '',
@@ -159,8 +160,8 @@ const PatientForm = () => {
                 </div>
               </div>
 
-              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="mb-4.5 w-full xl:w-1/2">
+              <div className="flex flex-col gap-6 xl:flex-row">
+                <div className="w-full xl:w-1/2">
                   <label className="mb-2.5 block text-black dark:text-white">
                     Email <span className="text-meta-1">*</span>
                   </label>
@@ -173,10 +174,10 @@ const PatientForm = () => {
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 </div>
-                <div className="mb-4.5 w-full xl:w-1/4">
+                <div className="w-full xl:w-1/4">
                   <SelectGroupOne />
                 </div>
-                <div className="mb-4.5 py-8.5 w-full xl:w-1/4">
+                <div className="py-8.5 w-full xl:w-1/4">
                 {!showDetailsFields && (<button
                     type="button"
                     onClick={handleAddMoreDetails}
@@ -186,7 +187,17 @@ const PatientForm = () => {
                   </button>)}
                 </div>
               </div>
-
+              <div className="mb-3">
+                <label className="mb-2.5 block text-black dark:text-white">Address</label>
+                <textarea
+                  name="address"
+                  rows={1}
+                  placeholder="Type here"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                ></textarea>
+              </div>
               <div className="mb-6">
                 <label className="mb-2.5 block text-black dark:text-white">Previous Medical History / Remarks</label>
                 <textarea

@@ -37,21 +37,21 @@ const UserList = () => {
       } catch (error) {
         //to be removed
         const data: Package[] = [
-          { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-          { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-          { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-          { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-          { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: 1 },
-          { id: 6, lastName: 'Melisandre', firstName: 'A', age: 150 },
-          { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-          { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-          { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-          { id: 10, lastName: 'Baratheon', firstName: 'Robert', age: 40 },
-          { id: 11, lastName: 'Tyrell', firstName: 'Margaery', age: 24 },
-          { id: 12, lastName: 'Greyjoy', firstName: 'Theon', age: 30 },
-          { id: 13, lastName: 'Bolton', firstName: 'Ramsay', age: 27 },
-          { id: 14, lastName: 'Martell', firstName: 'Oberyn', age: 38 },
-          { id: 15, lastName: 'Baelish', firstName: 'Petyr', age: 42 },
+          { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35, role: 'Admin' },
+          { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 , role: 'Admin'} ,
+          { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 , role: 'Admin' },
+          { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 , role: 'Admin' },
+          { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: 1 , role: 'Admin' },
+          { id: 6, lastName: 'Melisandre', firstName: 'A', age: 150 , role: 'Admin' },
+          { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 , role: 'Admin' },
+          { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 , role: 'Admin' },
+          { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 , role: 'Admin' },
+          { id: 10, lastName: 'Baratheon', firstName: 'Robert', age: 40 , role: 'Admin' },
+          { id: 11, lastName: 'Tyrell', firstName: 'Margaery', age: 24 , role: 'Admin' },
+          { id: 12, lastName: 'Greyjoy', firstName: 'Theon', age: 30 , role: 'Admin' },
+          { id: 13, lastName: 'Bolton', firstName: 'Ramsay', age: 27 , role: 'Admin' },
+          { id: 14, lastName: 'Martell', firstName: 'Oberyn', age: 38 , role: 'Admin' },
+          { id: 15, lastName: 'Baelish', firstName: 'Petyr', age: 42 , role: 'Admin' },
         ];
         setPackageData(data);
         setTotalPages(Math.ceil(data.length / pageSize));
@@ -62,7 +62,6 @@ const UserList = () => {
     fetchPackageData();
   }, []);
 
-  // Get paginated data
   const paginatedData = packageData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
@@ -72,7 +71,6 @@ const UserList = () => {
     setCurrentPage(page);
   };
 
-  // Modal handlers
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -115,6 +113,7 @@ const UserList = () => {
                 <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">Last name</th>
                 <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">First Name</th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">Age</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Role</th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">Actions</th>
               </tr>
             </thead>
@@ -132,6 +131,9 @@ const UserList = () => {
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">{packageItem.age}</p>
+                  </td>
+                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                    <p className="text-black dark:text-white">{packageItem.role}</p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <div className="flex items-center space-x-3.5">

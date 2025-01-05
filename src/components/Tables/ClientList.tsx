@@ -6,8 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Edit } from '@mui/icons-material';
-import DatePickerOne from '../Forms/DatePicker/DatePickerOne';
-import DOB from '../Forms/DatePicker/DOB';
+import Date from '../Forms/DatePicker/Date';
 
 const doctors = [
   { label: 'Dr. John Smith', value: 'Dr. John Smith' },
@@ -28,13 +27,10 @@ const ClientList = () => {
     fullName: '',
     phoneNumber: '',
     email: '',
-    age: '',
     dateOfBirth: '',
-    medicalHistory: '',
     time: '',
+    date:'',
     doctorName: '',
-    height: '',
-    weight: '',
     symptoms: '',
   });
 
@@ -45,10 +41,9 @@ const ClientList = () => {
     setIsModalOpen(true);
   };
   const handleDateChange = (date: string) => {
-    setFormData({ ...formData, dateOfBirth: date });
+    setFormData({ ...formData, date: date });
   };
   const handleOk = () => {
-    // Handle form submission logic here (e.g., sending data to the backend)
     console.log('Form Data:', formData);
     setIsModalOpen(false);
   };
@@ -80,10 +75,10 @@ const ClientList = () => {
         // Fallback data for testing
         const fallbackData: PackagePatient[] = [
           // Example data, replace with actual structure
-          { id: 1, fullName: 'Jon Snow', age: 35, phoneNumber: '123-456-7890', email: 'jon@example.com', dob: '1989-01-01' },
-          { id: 2, fullName: 'Cersei Lannister', age: 42, phoneNumber: '123-456-7891', email: 'cersei@example.com', dob: '1982-01-01' },
-          { id: 3, fullName: 'Jaime Lannister', age: 45, phoneNumber: '123-456-7892', email: 'jaime@example.com', dob: '1979-01-01' },
-          { id: 4, fullName: 'Arya Stark', age: 16, phoneNumber: '123-456-7893', email: 'arya@example.com', dob: '2008-01-01' },
+          { id: 1, fullName: 'Jon Snow', phoneNumber: '123-456-7890', email: 'jon@example.com', dob: '1989-01-01' },
+          { id: 2, fullName: 'Cersei Lannister', phoneNumber: '123-456-7891', email: 'cersei@example.com', dob: '1982-01-01' },
+          { id: 3, fullName: 'Jaime Lannister', phoneNumber: '123-456-7892', email: 'jaime@example.com', dob: '1979-01-01' },
+          { id: 4, fullName: 'Arya Stark', phoneNumber: '123-456-7893', email: 'arya@example.com', dob: '2008-01-01' },
           // Add more fallback data as needed
         ];
         setPackageData(fallbackData);
@@ -125,7 +120,6 @@ const ClientList = () => {
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 <th className="py-4 px-4 font-medium text-black dark:text-white">Full Name</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Age</th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">Phone Number</th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">Email</th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">DOB</th>
@@ -137,9 +131,6 @@ const ClientList = () => {
                 <tr key={key}>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="font-medium text-black dark:text-white">{packageItem.fullName}</p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-bla  ck dark:text-white">{packageItem.age}</p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">{packageItem.phoneNumber}</p>
@@ -207,34 +198,6 @@ const ClientList = () => {
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-1/2">
                   <label className="mb-2.5 block text-black dark:text-white">
-                    Height (cm)
-                  </label>
-                  <input
-                    type="number"
-                    name="height"
-                    placeholder="Enter height"
-                    value={formData.height}
-                    onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-                <div className="w-full xl:w-1/2">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Weight (kg)
-                  </label>
-                  <input
-                    type="number"
-                    name="weight"
-                    placeholder="Enter weight"
-                    value={formData.weight}
-                    onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                </div>
-              </div>
-              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-1/2">
-                  <label className="mb-2.5 block text-black dark:text-white">
                     Appointment Time
                   </label>
                   <input
@@ -246,7 +209,7 @@ const ClientList = () => {
                   />
                 </div>
                 <div className="w-full xl:w-1/2">
-                  <DOB onDateChange={handleDateChange} />
+                  <Date onDateChange={handleDateChange} />
                 </div>
               </div>
               <div className="mb-4.5 flex flex-col xl:flex-row">

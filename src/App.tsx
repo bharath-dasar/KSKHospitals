@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 // import Settings from './pages/Settings';
 // import CreateUser from './pages/CreatePatient';
 import PatientForm from './pages/PatientForm';
+import ReportForm from './pages/ReportForm';
 import CreateUser from './pages/CreateUser';
 import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
@@ -22,6 +23,7 @@ import DefaultLayout from './layout/DefaultLayout';
 import List from './pages/List';
 import UserList from './components/Tables/UserList';
 import ClientList from './components/Tables/ClientList';
+import MedicinesList from './components/Tables/MedicinesList';
 import DoctorList from './components/Tables/DoctorList';
 import CreatePatient from './pages/CreatePatient';
 import DoctorForm from './pages/DoctorForm';
@@ -131,6 +133,15 @@ function App() {
           }
         />
         <Route
+          path="/medicineList"
+          element={
+            <>
+              <PageTitle title="Pharamacy" />
+              <MedicinesList />
+            </>
+          }
+        />
+        <Route
           path="/doctorsList"
           element={
             <>
@@ -145,6 +156,15 @@ function App() {
             <>
               <PageTitle title="patientForm " />
               <PatientForm />
+            </>
+          }
+        />
+        <Route
+          path="/reportForm"
+          element={
+            <>
+              <PageTitle title="reportForm " />
+              <ReportForm />
             </>
           }
         />

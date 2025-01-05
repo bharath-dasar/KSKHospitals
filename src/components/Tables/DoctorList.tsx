@@ -31,7 +31,7 @@ const DoctorsList = () => {
   const navigate = useNavigate(); 
 
 
-  const pageSize = 10;
+  const pageSize = 7;
   // Fetch doctor data
   useEffect(() => {
     const fetchDoctorData = async () => {

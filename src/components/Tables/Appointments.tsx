@@ -1,5 +1,6 @@
 import React from 'react';
 import { Table } from 'antd';
+import { useNavigate } from 'react-router-dom'; // React Router v6
 import type { ColumnsType } from 'antd/es/table';
 
 // Define the Appointment Interface
@@ -52,6 +53,13 @@ const columns: ColumnsType<Appointment> = [
 
 // Main Appointments Component
 const Appointments: React.FC = () => {
+  const navigate = useNavigate(); // useNavigate hook for redirection
+
+  const handleRowClick = (record: Appointment) => {
+    // Redirect to the report form with the user ID as a query parameter
+    navigate(`/reportForm?user=${record.id}`);
+  };
+
   return (
     <div className="sm:grid-cols-2">
       <div className="flex flex-col gap-9">
@@ -66,6 +74,9 @@ const Appointments: React.FC = () => {
               rowKey="id"
               pagination={{ pageSize: 5 }}
               className="appointment-table"
+              onRow={(record) => ({
+                onClick: () => handleRowClick(record), // Handle row click
+              })}
             />
           </div>
         </div>
