@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import flatpickr from 'flatpickr';
 
-type DatePickerOneProps = {
+type DOBProps = {
   onDateChange: (date: string) => void;
 };
 
-const DatePickerOne = ({ onDateChange }: DatePickerOneProps) => {
+const DOB = ({ onDateChange }: DOBProps) => {
   useEffect(() => {
     // Init flatpickr
     flatpickr('.form-datepicker', {
@@ -54,4 +54,4 @@ const DatePickerOne = ({ onDateChange }: DatePickerOneProps) => {
   );
 };
 
-export default DatePickerOne;
+export default DOB;

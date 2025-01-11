@@ -11,13 +11,23 @@ import ECommerce from './pages/Dashboard/ECommerce';
 import FormElements from './pages/Form/FormElements';
 import FormLayout from './pages/Form/FormLayout';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
+// import Settings from './pages/Settings';
+// import CreateUser from './pages/CreatePatient';
+import PatientForm from './pages/PatientForm';
+import ReportForm from './pages/ReportForm';
 import CreateUser from './pages/CreateUser';
 import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
 import List from './pages/List';
+import UserList from './components/Tables/UserList';
+import ClientList from './components/Tables/ClientList';
+import MedicinesList from './components/Tables/MedicinesList';
+import DoctorList from './components/Tables/DoctorList';
+import CreatePatient from './pages/CreatePatient';
+import DoctorForm from './pages/DoctorForm';
+import Appointments from './components/Tables/Appointments';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -63,8 +73,8 @@ function App() {
           path="/profile"
           element={
             <>
-              <PageTitle title="Profile " />
-              <Profile />
+              <PageTitle title="Profile" />
+              <Profile/>
             </>
           }
         />
@@ -105,11 +115,92 @@ function App() {
           }
         />
         <Route
-          path="/settings"
+          path="/userList"
+          element={
+            <>
+              <PageTitle title="Users" />
+              <UserList />
+            </>
+          }
+        />
+        <Route
+          path="/clientList"
+          element={
+            <>
+              <PageTitle title="Clients" />
+              <ClientList />
+            </>
+          }
+        />
+        <Route
+          path="/medicineList"
+          element={
+            <>
+              <PageTitle title="Pharamacy" />
+              <MedicinesList />
+            </>
+          }
+        />
+        <Route
+          path="/doctorsList"
+          element={
+            <>
+              <PageTitle title="Doctors" />
+              <DoctorList />
+            </>
+          }
+        />
+        <Route
+          path="/patientForm"
+          element={
+            <>
+              <PageTitle title="patientForm " />
+              <PatientForm />
+            </>
+          }
+        />
+        <Route
+          path="/reportForm"
+          element={
+            <>
+              <PageTitle title="reportForm " />
+              <ReportForm />
+            </>
+          }
+        />
+        <Route
+          path="/appointments"
+          element={
+            <>
+              <PageTitle title="appointments" />
+              <Appointments />
+            </>
+          }
+        />
+        <Route
+          path="/doctorForm"
+          element={
+            <>
+              <PageTitle title="doctorForm " />
+              <DoctorForm />
+            </>
+          }
+        />
+        <Route
+          path="/createPatient"
           element={
             <>
               <PageTitle title="Settings " />
-              <Settings />
+              <CreatePatient />
+            </>
+          }
+        />
+        <Route
+          path="/createUser"
+          element={
+            <>
+              <PageTitle title="Settings " />
+              <CreateUser />
             </>
           }
         />
