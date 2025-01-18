@@ -4,20 +4,39 @@ import LogoDark from '../../images/logo/logo.png';
 import Logo from '../../images/logo/logo.png';
 
 const SignIn: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [username, setusername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check credentials
-    if (email === 'a@gmail.com' && password === 'a@123') {
-      // Set session storage
-      sessionStorage.setItem('isLoggedIn', 'true');
-      navigate('/'); // Redirect to home page
-    } else {
-      alert('Invalid credentials. Please try again.');
+    try {
+      const response = await fetch('http://localhost:8081/kskhospital/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
+      const data = await response.json();
+      console.log("___hiii",data)
+      if (data) {
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('hospitalID',data.hospitalID);
+        sessionStorage.setItem('hospital',data.hospital);
+        sessionStorage.setItem('username',data.username);
+        navigate('/');
+      } else {
+        alert('Invalid credentials. Please try again.');
+      }
+    } catch (error) {
+      alert('Error during login. Please try again.');
+      console.error(error);
     }
   };
 
@@ -41,13 +60,13 @@ const SignIn: React.FC = () => {
 
             <form onSubmit={handleLogin}>
               <div className="mb-4">
-                <label className="mb-2.5 block font-medium text-black dark:text-white">Email</label>
+                <label className="mb-2.5 block font-medium text-black dark:text-white">Username</label>
                 <input
-                  type="email"
-                  placeholder="Enter your email"
+                  type="username"
+                  placeholder="Enter your username"
                   className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setusername(e.target.value)}
                 />
               </div>
 
