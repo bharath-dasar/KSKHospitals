@@ -22,8 +22,7 @@ const SignIn: React.FC = () => {
       if (!response.ok) {
         throw new Error('Invalid credentials');
       }
-      const data = await response.json();
-      console.log("___hiii",data)
+      const data = await response.json(); 
       if (data) {
         sessionStorage.setItem('isLoggedIn', 'true');
         sessionStorage.setItem('token', data.token);
@@ -88,15 +87,6 @@ const SignIn: React.FC = () => {
                   className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                 />
               </div>
-
-              {/* <div className="mt-6 text-center">
-                <p>
-                  Don’t have an account?{' '}
-                  <Link to="/auth/signup" className="text-primary">
-                    Sign Up
-                  </Link>
-                </p>
-              </div> */}
             </form>
           </div>
         </div>
