@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { Select, Button, Table, Input } from 'antd';
-import { useNavigate } from 'react-router-dom'; // Add useNavigate for navigation
-import axios from 'axios'; // Import Axios
+import { Select, Table, Input } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const { Option } = Select;
 
 const ReportPage = () => {
-  const navigate = useNavigate(); // Initialize navigate
-  const [selectedMedicines, setSelectedMedicines] = useState<
-    { medicine: string; tablets: string; usageInstructions: string }[]
-  >([]);
+  const navigate = useNavigate();
+  const [selectedMedicines, setSelectedMedicines] = useState<{ medicine: string; tablets: string; usageInstructions: string }[]>([]);
   const [selectedDiseases, setSelectedDiseases] = useState<string[]>([]);
   const [reportData, setReportData] = useState({
     patientName: '',
@@ -55,7 +53,7 @@ const ReportPage = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
     const payload = {
       ...reportData,
       prescribedMedicines: selectedMedicines,
@@ -63,9 +61,7 @@ const ReportPage = () => {
     };
 
     try {
-      // Send data to the backend
       await axios.post('/api/reports', payload);
-      // Navigate to /appointments upon successful submission
       navigate('/appointments');
     } catch (error) {
       console.error('Error submitting report:', error);
@@ -81,7 +77,7 @@ const ReportPage = () => {
             <h3 className="font-medium text-black dark:text-white">Report Page</h3>
           </div>
           <div className="p-6.5">
-            <form onSubmit={handleSubmit}>
+            <form>
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-full">
                   <label className="mb-2.5 block text-black dark:text-white">
@@ -186,7 +182,7 @@ const ReportPage = () => {
                       title: 'Number of Tablets',
                       dataIndex: 'tablets',
                       key: 'tablets',
-                      render: (_, record, index) => (
+                      render: (_, _record, index) => (
                         <Input
                           type="number"
                           value={selectedMedicines[index].tablets}
@@ -202,7 +198,7 @@ const ReportPage = () => {
                       title: 'Usage Instructions',
                       dataIndex: 'usageInstructions',
                       key: 'usageInstructions',
-                      render: (_, record, index) => (
+                      render: (_, _record, index) => (
                         <Input
                           type="text"
                           value={selectedMedicines[index].usageInstructions}
@@ -223,6 +219,7 @@ const ReportPage = () => {
             <div className="p-6.5">
               <button
                 type="submit"
+                onClick={handleSubmit}
                 className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
               >
                 Submit Report
