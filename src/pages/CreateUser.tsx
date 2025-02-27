@@ -32,44 +32,46 @@ const CreateUser = () => {
     setFormData({ ...formData, dateOfBirth: date });
   };
 
-  const handleCreateUser = async () => {
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevents the browser from appending form values to URL
+
     const token = sessionStorage.getItem("token");
     if (!token) {
       console.error("Token is missing in sessionStorage");
       return;
     }
+
     const requestBody = {
-      dob: formData.age,
-      name: `${formData.name}`,
-      email: formData.email,
-      role: formData.role,
-      phone: formData.phoneNumber,
+      identifier: "test-123",
+      dob: "2025-02-10",
+      age: "30",
+      name: "Bharath V S",
+      email: "vsbharathdasar@gmail.com",
+      role: "MEMBER",
+      phone: "07619325324",
       address: {
-        address: formData.addressLine1,
-        addressLine2: formData.addressLine1,
-        city: formData.city,
-        state: formData.state,
-        country: formData.state,
-        postalCode: formData.postalCode,
+        addressLine1: " ",
       },
-      hospitalIdentifier: sessionStorage.getItem("hospitalID"),
-      designation: formData.designation,
+      hospitalIdentifier: "hospital-001",
+      designation: "Doctor",
     };
+    console.log("Request Body:", JSON.stringify(requestBody, null, 2));
+
     try {
-      const response = await axios.post("/user", JSON.stringify(requestBody), {
+      const response = await axios.post("/user", requestBody, {
         headers: {
           "Content-Type": "application/json",
-          curIdentifier: sessionStorage.getItem("userID"),
+          CurrentUserId: sessionStorage.getItem("useridentifier"),
           Authorization: `Bearer ${token}`,
         },
       });
+
       console.log("User Created:", response.data);
       navigate("/userList");
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
-
   return (
     <div className="sm:grid-cols-2">
       <div className="flex flex-col gap-9">

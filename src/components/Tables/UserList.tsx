@@ -21,14 +21,11 @@ const UserList = () => {
         return;
       }
       try {
-        const response = await axios.get(
-          "http://localhost:8081/kskhospital/user",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Send token as Bearer token
-            },
+        const response = await axios.get("user", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send token as Bearer token
           },
-        );
+        });
         const data = response.data; // Axios automatically parses JSON
         setPackageData(data);
         setTotalPages(Math.ceil(data.length / pageSize));

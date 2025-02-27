@@ -1,41 +1,49 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import LogoDark from '../../images/logo/logo.png';
-import Logo from '../../images/logo/logo.png';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import LogoDark from "../../images/logo/logo.png";
+import Logo from "../../images/logo/logo.png";
+import axios from "axios";
 
 const SignIn: React.FC = () => {
-  const [username, setusername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setusername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      const response = await fetch('http://localhost:8081/kskhospital/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
-      }
-      const data = await response.json(); 
-      if (data) {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', data.token);
-        sessionStorage.setItem('hospitalID',data.hospitalID);
-        sessionStorage.setItem('hospital',data.hospital);
-        sessionStorage.setItem('username',data.username);
-        navigate('/');
+      const response = await axios.post(
+        "auth/login",
+        { username, password },
+        { withCredentials: true }, // Include cookies if backend supports session auth
+      );
+
+      if (response.data) {
+        const {
+          token,
+          hospitalID,
+          hospital,
+          username,
+          userid,
+          useridentifier,
+        } = response.data;
+
+        sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("hospitalID", hospitalID);
+        sessionStorage.setItem("hospital", hospital);
+        sessionStorage.setItem("username", username);
+        sessionStorage.setItem("userid", userid);
+        sessionStorage.setItem("useridentifier", useridentifier);
+
+        navigate("/");
       } else {
-        alert('Invalid credentials. Please try again.');
+        alert("Invalid credentials. Please try again.");
       }
     } catch (error) {
-      alert('Error during login. Please try again.');
-      console.error(error);
+      console.error("Login error:", error);
+      alert("Error during login. Please try again.");
     }
   };
 
@@ -59,7 +67,9 @@ const SignIn: React.FC = () => {
 
             <form onSubmit={handleLogin}>
               <div className="mb-4">
-                <label className="mb-2.5 block font-medium text-black dark:text-white">Username</label>
+                <label className="mb-2.5 block font-medium text-black dark:text-white">
+                  Username
+                </label>
                 <input
                   type="username"
                   placeholder="Enter your username"
@@ -70,7 +80,9 @@ const SignIn: React.FC = () => {
               </div>
 
               <div className="mb-6">
-                <label className="mb-2.5 block font-medium text-black dark:text-white">Password</label>
+                <label className="mb-2.5 block font-medium text-black dark:text-white">
+                  Password
+                </label>
                 <input
                   type="password"
                   placeholder="6+ Characters, 1 Capital letter"
