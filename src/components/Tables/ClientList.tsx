@@ -68,10 +68,10 @@ const ClientList = () => {
   useEffect(() => {
     const fetchPackageData = async () => {
       try {
-        const hospitalIdentifier = sessionStorage.getItem("hospitalID");
+        const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
         const token = sessionStorage.getItem("token");
         const response = await axios.get(
-          `/patient/getAll/cdc334b0-6b95-4319-978d-7a89e7702336`,
+          `/patient/getAll/${hospitalIdentifier}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -80,7 +80,7 @@ const ClientList = () => {
             },
           },
         );
-
+        console.log("________AAAAAAAA", response.data);
         const data: PackagePatient[] = response.data;
         setPackageData(data);
         setTotalPages(Math.ceil(data.length / pageSize));
@@ -145,12 +145,12 @@ const ClientList = () => {
                 <tr key={key}>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="font-medium text-black dark:text-white">
-                      {packageItem.fullName}
+                      {packageItem.username}
                     </p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">
-                      {packageItem.phoneNumber}
+                      {packageItem.phone}
                     </p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
