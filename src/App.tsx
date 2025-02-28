@@ -29,6 +29,7 @@ import CreatePatient from "./pages/CreatePatient";
 import DoctorForm from "./pages/DoctorForm";
 import Appointments from "./components/Tables/Appointments";
 import axios from "axios";
+import ReportGenerate from "./pages/ReportGenerate";
 
 axios.defaults.baseURL = "http://localhost:8081/kskhospital/";
 
@@ -168,6 +169,15 @@ function App() {
             <>
               <PageTitle title="reportForm " />
               <ReportForm />
+            </>
+          }
+        />
+        <Route
+          path="/reportgenerate"
+          element={
+            <>
+              <PageTitle title="reportForm " />
+              <ReportGenerate />
             </>
           }
         />
