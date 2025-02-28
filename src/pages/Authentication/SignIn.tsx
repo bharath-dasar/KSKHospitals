@@ -18,24 +18,25 @@ const SignIn: React.FC = () => {
         { username, password },
         { withCredentials: true }, // Include cookies if backend supports session auth
       );
-
       if (response.data) {
         const {
+          HospitalIdentifier,
+          designation,
+          email,
+          role,
           token,
-          hospitalID,
-          hospital,
+          userIdentifier,
           username,
-          userid,
-          useridentifier,
         } = response.data;
 
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("token", token);
-        sessionStorage.setItem("hospitalID", hospitalID);
-        sessionStorage.setItem("hospital", hospital);
+        sessionStorage.setItem("HospitalIdentifier", HospitalIdentifier);
+        sessionStorage.setItem("designation", designation);
+        sessionStorage.setItem("email", email);
+        sessionStorage.setItem("role", role);
         sessionStorage.setItem("username", username);
-        sessionStorage.setItem("userid", userid);
-        sessionStorage.setItem("useridentifier", useridentifier);
+        sessionStorage.setItem("userIdentifier", userIdentifier);
 
         navigate("/");
       } else {

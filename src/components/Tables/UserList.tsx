@@ -21,7 +21,7 @@ const UserList = () => {
         return;
       }
       try {
-        const response = await axios.get("user", {
+        const response = await axios.get("user/getAll", {
           headers: {
             Authorization: `Bearer ${token}`, // Send token as Bearer token
           },

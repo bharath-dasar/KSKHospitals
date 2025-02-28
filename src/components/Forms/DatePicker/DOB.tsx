@@ -1,25 +1,24 @@
-import { useEffect } from 'react';
-import flatpickr from 'flatpickr';
+import { useEffect } from "react";
+import flatpickr from "flatpickr";
 
 type DOBProps = {
-  onDateChange: (date: string) => void;
+  onDateCsrhange: (date: string) => void;
 };
 
 const DOB = ({ onDateChange }: DOBProps) => {
   useEffect(() => {
     // Init flatpickr
-    flatpickr('.form-datepicker', {
-      mode: 'single',
+    flatpickr(".form-datepicker", {
+      mode: "single",
       static: true,
-      monthSelectorType: 'static',
-      dateFormat: 'M j, Y',
+      monthSelectorType: "static",
+      dateFormat: "Y-m-d", // Formats date as YYYY-MM-DD
       prevArrow:
         '<svg className="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M5.4 10.8l1.4-1.4-4-4 4-4L5.4 0 0 5.4z" /></svg>',
       nextArrow:
         '<svg className="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M1.4 10.8L0 9.4l4-4-4-4L1.4 0l5.4 5.4z" /></svg>',
-      onChange: (selectedDates, dateStr) => {
-        // Trigger the callback with the selected date
-        onDateChange(dateStr);
+      onChange: (_selectedDates, dateStr) => {
+        onDateChange(dateStr); // Returns date as YYYY-MM-DD
       },
     });
   }, [onDateChange]);
