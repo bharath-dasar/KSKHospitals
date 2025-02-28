@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import flatpickr from "flatpickr";
 
 type DOBProps = {
-  onDateCsrhange: (date: string) => void;
+  onDateChange: (date: string) => void;
 };
 
 const DOB = ({ onDateChange }: DOBProps) => {
