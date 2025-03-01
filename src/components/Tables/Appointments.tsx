@@ -1,7 +1,8 @@
-import React from 'react';
-import { Table } from 'antd';
-import { useNavigate } from 'react-router-dom'; // React Router v6
-import type { ColumnsType } from 'antd/es/table';
+import React, { useEffect } from "react";
+import { message, Table } from "antd";
+import { useNavigate } from "react-router-dom"; // React Router v6
+import type { ColumnsType } from "antd/es/table";
+import axios from "axios";
 
 // Define the Appointment Interface
 export interface Appointment {
@@ -15,46 +16,102 @@ export interface Appointment {
 
 // Sample Data for Testing
 const sampleAppointments: Appointment[] = [
-  { id: 1, patientName: 'Jon Snow', doctorName: 'Dr. Emily White', appointmentDate: '2024-11-02', appointmentTime: '10:30', symptoms: 'Headache' },
-  { id: 2, patientName: 'Arya Stark', doctorName: 'Dr. Michael Brown', appointmentDate: '2024-11-03', appointmentTime: '14:00', symptoms: 'Fever' },
-  { id: 3, patientName: 'Daenerys Targaryen', doctorName: 'Dr. John Smith', appointmentDate: '2024-11-04', appointmentTime: '09:00', symptoms: 'Cough' },
-  { id: 4, patientName: 'Tyrion Lannister', doctorName: 'Dr. Emily White', appointmentDate: '2024-11-05', appointmentTime: '11:15', symptoms: 'Back Pain' },
-  { id: 5, patientName: 'Bran Stark', doctorName: 'Dr. Michael Brown', appointmentDate: '2024-11-06', appointmentTime: '13:45', symptoms: 'Dizziness' },
+  {
+    id: 1,
+    patientName: "Jon Snow",
+    doctorName: "Dr. Emily White",
+    appointmentDate: "2024-11-02",
+    appointmentTime: "10:30",
+    symptoms: "Headache",
+  },
+  {
+    id: 2,
+    patientName: "Arya Stark",
+    doctorName: "Dr. Michael Brown",
+    appointmentDate: "2024-11-03",
+    appointmentTime: "14:00",
+    symptoms: "Fever",
+  },
+  {
+    id: 3,
+    patientName: "Daenerys Targaryen",
+    doctorName: "Dr. John Smith",
+    appointmentDate: "2024-11-04",
+    appointmentTime: "09:00",
+    symptoms: "Cough",
+  },
+  {
+    id: 4,
+    patientName: "Tyrion Lannister",
+    doctorName: "Dr. Emily White",
+    appointmentDate: "2024-11-05",
+    appointmentTime: "11:15",
+    symptoms: "Back Pain",
+  },
+  {
+    id: 5,
+    patientName: "Bran Stark",
+    doctorName: "Dr. Michael Brown",
+    appointmentDate: "2024-11-06",
+    appointmentTime: "13:45",
+    symptoms: "Dizziness",
+  },
 ];
 
 // Define Table Columns for Appointments
 const columns: ColumnsType<Appointment> = [
   {
-    title: 'Patient Name',
-    dataIndex: 'patientName',
-    key: 'patientName',
+    title: "Patient Name",
+    dataIndex: "patientName",
+    key: "patientName",
   },
   {
-    title: 'Doctor Name',
-    dataIndex: 'doctorName',
-    key: 'doctorName',
+    title: "Doctor Name",
+    dataIndex: "doctorName",
+    key: "doctorName",
   },
   {
-    title: 'Appointment Date',
-    dataIndex: 'appointmentDate',
-    key: 'appointmentDate',
+    title: "Appointment Date",
+    dataIndex: "appointmentDate",
+    key: "appointmentDate",
   },
   {
-    title: 'Appointment Time',
-    dataIndex: 'appointmentTime',
-    key: 'appointmentTime',
+    title: "Appointment Time",
+    dataIndex: "appointmentTime",
+    key: "appointmentTime",
   },
   {
-    title: 'Symptoms',
-    dataIndex: 'symptoms',
-    key: 'symptoms',
+    title: "Symptoms",
+    dataIndex: "symptoms",
+    key: "symptoms",
   },
 ];
 
 // Main Appointments Component
 const Appointments: React.FC = () => {
   const navigate = useNavigate(); // useNavigate hook for redirection
+  useEffect(() => {
+    const fetchPackageData = async () => {
+      try {
+        const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+        const token = sessionStorage.getItem("token");
+        const response = await axios.get(`/appointment`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            CurrentUserId: sessionStorage.getItem("useridentifier"),
+            HospitalIdentifier: hospitalIdentifier,
+          },
+        });
+        console.log("________AAAAAAAA", response.data);
+        // const data: PackagePatient[] = response.data;
+      } catch (error) {
+        console.error("Error fetching package data:", error);
+        message.error("Error fetching data");
+      }
+    };
 
+    fetchPackageData();
+  }, []);
   const handleRowClick = (record: Appointment) => {
     // Redirect to the report form with the user ID as a query parameter
     navigate(`/reportForm?user=${record.id}`);
@@ -65,7 +122,9 @@ const Appointments: React.FC = () => {
       <div className="flex flex-col gap-9">
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-            <h3 className="font-medium text-black dark:text-white">Assigned Appointments</h3>
+            <h3 className="font-medium text-black dark:text-white">
+              Assigned Appointments
+            </h3>
           </div>
           <div className="p-6.5">
             <Table

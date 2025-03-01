@@ -1,12 +1,12 @@
 export type Package = {
-  id: number;
+  identifier: string;
   name: string; // Combine first and last name
   phone: string; // Ensure to add this if needed
   email: string;
   role: string;
 };
 export type PackagePatient = {
-  id: number;
+  identifier: string;
   username: string; // Combine first and last name
   // age: number;
   phone: string; // Ensure to add this if needed

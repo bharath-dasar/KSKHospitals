@@ -7,34 +7,40 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const UserList = () => {
-  // Explicitly define the type of packageData
   const [packageData, setPackageData] = useState<Package[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
   const navigate = useNavigate();
-  useEffect(() => {
-    const fetchPackageData = async () => {
-      const token = sessionStorage.getItem("token");
-      if (!token) {
-        console.error("Token is missing in sessionStorage");
-        return;
-      }
-      try {
-        const response = await axios.get("user/getAll", {
+
+  const fetchPackageData = async () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      console.error("Token is missing in sessionStorage");
+      return;
+    }
+    try {
+      const response = await axios.get(
+        sessionStorage.getItem("role") === "SUPERUSER"
+          ? "user/getAll"
+          : "user/getAll/hospital",
+        {
           headers: {
-            Authorization: `Bearer ${token}`, // Send token as Bearer token
+            "Content-Type": "application/json",
+            CurrentUserId: sessionStorage.getItem("useridentifier"),
+            Authorization: `Bearer ${token}`,
           },
-        });
-        const data = response.data; // Axios automatically parses JSON
-        setPackageData(data);
-        setTotalPages(Math.ceil(data.length / pageSize));
-      } catch (error) {
-        console.error("Error fetching package data:", error);
-      }
-    };
-    fetchPackageData();
-  }, []);
+        },
+      );
+
+      const data = response.data;
+      setPackageData(Array.isArray(data) ? data : []);
+      setTotalPages(Math.ceil(data.length / pageSize));
+    } catch (error) {
+      console.error("Error fetching package data:", error);
+      setPackageData([]); // Ensure packageData is always an array
+    }
+  };
 
   const paginatedData = packageData.slice(
     (currentPage - 1) * pageSize,
@@ -44,6 +50,39 @@ const UserList = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  useEffect(() => {
+    fetchPackageData();
+  }, []);
+
+  function userdelete(identifier: string) {
+    const deleteFunc = async () => {
+      const token = sessionStorage.getItem("token");
+
+      if (!token) {
+        console.error("Token is missing in sessionStorage");
+        return;
+      }
+      try {
+        await axios.delete(`user/${identifier}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // ✅ Remove deleted user from UI
+        setPackageData((prevData) =>
+          prevData.filter((user) => user.identifier !== identifier),
+        );
+
+        // ✅ Update pagination after deletion
+        setTotalPages((_prev) =>
+          Math.ceil((packageData.length - 1) / pageSize),
+        );
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
+    };
+    deleteFunc();
+  }
 
   return (
     <div>
@@ -66,7 +105,7 @@ const UserList = () => {
                   Name
                 </th>
                 <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                  E Mail
+                  Email
                 </th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">
                   Phone Number
@@ -80,42 +119,54 @@ const UserList = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((packageItem, key) => (
-                <tr key={key}>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">
-                      {packageItem.name}
-                    </p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">
-                      {packageItem.email}
-                    </p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">
-                      {packageItem.phone}
-                    </p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">
-                      {packageItem.role}
-                    </p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <div className="flex items-center space-x-3.5">
-                      <button className="hover:text-primary">
-                        <Edit />
-                      </button>
-                      <button className="hover:text-primary">
-                        <DeleteIcon />
-                      </button>
-                    </div>
+              {Array.isArray(paginatedData) && paginatedData.length > 0 ? (
+                paginatedData.map((packageItem, key) => (
+                  <tr key={key}>
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                      <p className="text-black dark:text-white">
+                        {packageItem.name}
+                      </p>
+                    </td>
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                      <p className="text-black dark:text-white">
+                        {packageItem.email}
+                      </p>
+                    </td>
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                      <p className="text-black dark:text-white">
+                        {packageItem.phone}
+                      </p>
+                    </td>
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                      <p className="text-black dark:text-white">
+                        {packageItem.role}
+                      </p>
+                    </td>
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                      <div className="flex items-center space-x-3.5">
+                        <button className="hover:text-primary">
+                          <Edit />
+                        </button>
+                        <button
+                          className="hover:text-primary"
+                          onClick={() => userdelete(packageItem.identifier)}
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-4">
+                    No users available
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
+
           {/* Pagination Controls */}
           <div className="flex justify-between mt-4">
             <button
@@ -131,7 +182,9 @@ const UserList = () => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`py-2 px-4 ${currentPage === totalPages ? "opacity-50" : ""}`}
+              className={`py-2 px-4 ${
+                currentPage === totalPages ? "opacity-50" : ""
+              }`}
             >
               Next
             </button>

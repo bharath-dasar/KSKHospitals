@@ -65,34 +65,50 @@ const ClientList = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  useEffect(() => {
-    const fetchPackageData = async () => {
-      try {
-        const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
-        const token = sessionStorage.getItem("token");
-        const response = await axios.get(
-          `/patient/getAll/${hospitalIdentifier}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              CurrentUserId: sessionStorage.getItem("useridentifier"),
-              HospitalIdentifier: hospitalIdentifier,
-            },
+  const fetchPackageData = async () => {
+    try {
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+      const response = await axios.get(
+        `/patient/getAll/${hospitalIdentifier}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            CurrentUserId: sessionStorage.getItem("useridentifier"),
+            HospitalIdentifier: hospitalIdentifier,
           },
-        );
-        console.log("________AAAAAAAA", response.data);
-        const data: PackagePatient[] = response.data;
-        setPackageData(data);
-        setTotalPages(Math.ceil(data.length / pageSize));
-      } catch (error) {
-        console.error("Error fetching package data:", error);
-        message.error("Error fetching data");
-      }
-    };
+        },
+      );
+      const data: PackagePatient[] = response.data;
+      setPackageData(data);
+      setTotalPages(Math.ceil(data.length / pageSize));
+    } catch (error) {
+      console.error("Error fetching package data:", error);
+      message.error("Error fetching data");
+    }
+  };
 
+  useEffect(() => {
     fetchPackageData();
   }, []);
 
+  const deletePatient = async (patientIdentifier: string) => {
+    try {
+      console.log("______AAAAAAAAA", patientIdentifier);
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+      const response = await axios.get(`/patient/${patientIdentifier}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: sessionStorage.getItem("useridentifier"),
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+      fetchPackageData();
+    } catch (error) {
+      message.error("Error fetching data");
+    }
+  };
   const paginatedData = packageData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
@@ -182,7 +198,10 @@ const ClientList = () => {
                       {/* Delete Appointment Button */}
                       {/* permission based button */}
                       <Tooltip title="Delete Patient">
-                        <button className="hover:text-primary">
+                        <button
+                          className="hover:text-primary"
+                          onClick={() => deletePatient(packageItem.identifier)}
+                        >
                           <DeleteIcon />
                         </button>
                       </Tooltip>
