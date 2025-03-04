@@ -95,13 +95,27 @@ const Appointments: React.FC = () => {
       try {
         const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
         const token = sessionStorage.getItem("token");
-        const response = await axios.get(`/appointment`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            CurrentUserId: sessionStorage.getItem("useridentifier"),
-            HospitalIdentifier: hospitalIdentifier,
+
+        const fromDate = new Date(); // Example: Set the start date dynamically
+        const toDate = new Date(); // Example: Set the end date dynamically
+
+        // Format dates as YYYY-MM-DD for query parameters
+        const formattedFrom = fromDate.toISOString();
+        const formattedTo = toDate.toISOString();
+
+        const response = await axios.get(
+          `/appointment/getAll/?from=${formattedFrom}&to=${formattedTo}`,
+          {
+            // params: { from: formattedFrom, to: formattedTo },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              CurrentUserId: sessionStorage.getItem("useridentifier"),
+              HospitalIdentifier: hospitalIdentifier,
+              // from: formattedFrom,
+              // to: formattedTo,
+            },
           },
-        });
+        );
         console.log("________AAAAAAAA", response.data);
         // const data: PackagePatient[] = response.data;
       } catch (error) {
@@ -143,5 +157,5 @@ const Appointments: React.FC = () => {
     </div>
   );
 };
-
+//
 export default Appointments;

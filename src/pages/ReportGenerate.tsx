@@ -1,24 +1,100 @@
 import React, { useState, useRef } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import axios from "axios";
+import { Select } from "antd";
+
+const { Option } = Select;
 
 const ReportGenerate = () => {
   const reportRef = useRef(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [reportData, setReportData] = useState({
     doctorCharge: "",
     additionalCharges: "",
   });
 
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false); // Hide button when generating PDF
+  const [selectedDiseases, setSelectedDiseases] = useState([]);
+  const [diseaseImage, setDiseaseImage] = useState(null); // State to store fetched image
+
+  const availableMapOragans = [
+    { key: "heart", value: 1, label: "Heart Disease" },
+    { key: "lungs", value: 2, label: "Lung Infection" },
+    { key: "kidney", value: 3, label: "Kidney Failure" },
+    { key: "liver", value: 4, label: "Liver Cirrhosis" },
+    { key: "brain", value: 5, label: "Brain Stroke" },
+    { key: "stomach", value: 6, label: "Gastric Ulcer" },
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setReportData({ ...reportData, [name]: value });
+    setReportData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const generatePDF = () => {
-    setIsGeneratingPDF(true); // Hide button before generating PDF
+  const handleDiseaseSelect = async (value) => {
+    setSelectedDiseases(value);
 
+    if (value.length > 0) {
+      const lastSelected = value[value.length - 1]; // Get the latest selected value
+      fetchDiseaseImage(lastSelected);
+    } else {
+      setDiseaseImage(null); // Clear image if no selection
+    }
+  };
+
+  const fetchDiseaseImage = async (pointIndex) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const hospitalIdentifier = sessionStorage.getItem("hospitalIdentifier");
+      const currentUserId = sessionStorage.getItem("useridentifier");
+
+      const response = await axios.get(`/user/process/${pointIndex}`, {
+        responseType: "arraybuffer", // To handle binary image response
+        headers: {
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: currentUserId,
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+
+      // const blob = new Blob([response.data], { type: "image/png" });
+      // const imageUrl = URL.createObjectURL(blob);
+      // setDiseaseImage(imageUrl);
+    } catch (error) {
+      console.error("Error fetching image:", error);
+    }
+  };
+
+  // const fetchImage = async (pointIndex) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `http://localhost:8081/kskhospital/reflexology/process/${pointIndex}`,
+  //       {
+  //         responseType: "arraybuffer", // To handle binary image response
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           CurrentUserId: currentUserId,
+  //           HospitalIdentifier: hospitalIdentifier,
+  //         },
+  //       },
+  //     );
+  //
+  //     // Convert binary response to a Base64-encoded image
+  //     const base64Image = btoa(
+  //       new Uint8Array(response.data).reduce(
+  //         (data, byte) => data + String.fromCharCode(byte),
+  //         "",
+  //       ),
+  //     );
+  //     setImageSrc(`data:image/jpeg;base64,${base64Image}`);
+  //     setSelectedPoint(pointIndex);
+  //   } catch (error) {
+  //     console.error("Error fetching image:", error);
+  //   }
+  // };
+
+  const generatePDF = () => {
+    setIsGeneratingPDF(true);
     setTimeout(() => {
       html2canvas(reportRef.current, { scale: 2 }).then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
@@ -29,9 +105,9 @@ const ReportGenerate = () => {
         pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
         pdf.save("Patient_Report.pdf");
 
-        setIsGeneratingPDF(false); // Show button after generating PDF
+        setIsGeneratingPDF(false);
       });
-    }, 100); // Small delay to ensure button is hidden
+    }, 100);
   };
 
   return (
@@ -41,7 +117,7 @@ const ReportGenerate = () => {
           ref={reportRef}
           className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6"
         >
-          {/* 🔹 Company Logo */}
+          {/* Company Logo */}
           <div className="flex justify-center mb-6">
             <img
               src="../../src/images/logo/logo.png"
@@ -50,6 +126,7 @@ const ReportGenerate = () => {
             />
           </div>
 
+          {/* Report Header */}
           <div className="border-b border-stroke py-4 px-6 dark:border-strokedark">
             <h3 className="font-medium text-black dark:text-white">
               Report Page
@@ -85,6 +162,48 @@ const ReportGenerate = () => {
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
             />
           </div>
+
+          {/* Diagnosed Diseases/Conditions */}
+          <div className="mb-4.5">
+            <label className="mb-2.5 block text-black dark:text-white">
+              Diagnosed Diseases/Conditions
+            </label>
+            <Select
+              mode="multiple"
+              placeholder="Search and add diseases"
+              value={selectedDiseases}
+              onChange={handleDiseaseSelect}
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option?.children.toLowerCase().includes(input.toLowerCase())
+              }
+              className="w-full border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary"
+            >
+              {availableMapOragans.map((disease) => (
+                <Option key={disease.key} value={disease.value}>
+                  {disease.label}
+                </Option>
+              ))}
+            </Select>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-4">
+            <img
+              src="../../src/images/logo/reflexology_test.jpeg"
+              alt="Selected Disease"
+              className="w-92 h-92 rounded-lg border"
+            />
+          </div>
+          {/* Display Disease Image if available */}
+          {diseaseImage && (
+            <div className="mt-4 flex justify-center">
+              <img
+                src={diseaseImage}
+                alt="Reflexology Point"
+                className="max-w-full h-auto border border-gray-300 p-2 rounded-md"
+              />
+            </div>
+          )}
 
           {/* Generate Bill Button (Hidden in PDF) */}
           {!isGeneratingPDF && (

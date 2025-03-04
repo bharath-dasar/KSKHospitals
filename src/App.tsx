@@ -168,7 +168,7 @@ function App() {
           element={
             <>
               <PageTitle title="reportForm " />
-              <ReportForm />
+              <ReportGenerate />
             </>
           }
         />
