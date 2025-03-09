@@ -97,7 +97,7 @@ const ClientList = () => {
       console.log("______AAAAAAAAA", patientIdentifier);
       const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
       const token = sessionStorage.getItem("token");
-      await axios.get(`/patient/${patientIdentifier}`, {
+      await axios.delete(`/patient/${patientIdentifier}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           CurrentUserId: sessionStorage.getItem("useridentifier"),
