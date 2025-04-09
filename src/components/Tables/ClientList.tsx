@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { AutoComplete, Button, message, Modal, Tooltip } from "antd";
+import {
+  DatePicker,
+  AutoComplete,
+  Button,
+  message,
+  Modal,
+  Tooltip,
+} from "antd";
 import axios from "axios";
 import { PackagePatient } from "../../types/package";
 import { useNavigate } from "react-router-dom";
@@ -20,8 +27,26 @@ const ClientList = () => {
   const [filteredDoctors, setFilteredDoctors] = useState(doctors);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
+  const [usedPatientIdentifier, setUsedPatientIdentifier] =
+    useState<String>("");
+  const [usedDoctorIdentifier, setUsedDoctorIdentifier] = useState<String>("");
 
   const navigate = useNavigate();
+
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isoString, setIsoString] = useState("");
+
+  const handleDateChange = (value) => {
+    setSelectedDate(value);
+    setFormData({ ...formData, date: value });
+  };
+
+  const handleConvert = () => {
+    if (selectedDate) {
+      const date = new Date(selectedDate);
+      setIsoString(date.toISOString());
+    }
+  };
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -40,12 +65,38 @@ const ClientList = () => {
   const showModal = () => {
     setIsModalOpen(true);
   };
-  const handleDateChange = (date: string) => {
-    setFormData({ ...formData, date: date });
-  };
-  const handleOk = () => {
+
+  // Testing purpose
+  const handleOk = async () => {
     console.log("Form Data:", formData);
-    setIsModalOpen(false);
+    try {
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+
+      const fromDate = new Date(); // Example: Set the start date dynamically
+      const toDate = new Date(); // Example: Set the end date dynamically
+      const requestBody = {
+        appointmentIdentifier: "",
+        hospitalIdentifier: hospitalIdentifier,
+        patientIdentifier: usedPatientIdentifier,
+        doctorIdentifier: usedDoctorIdentifier,
+        dateTime: "2025-03-30T17:57:46.999Z",
+        reason: "Mild Concussions",
+        status: "OPEN",
+      };
+
+      await axios.post(`/appointment`, requestBody, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: sessionStorage.getItem("useridentifier"),
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error fetching package data:", error);
+      message.error("Error fetching data");
+    }
   };
   const handleDoctorSearch = (value: string) => {
     setFilteredDoctors(
@@ -94,7 +145,6 @@ const ClientList = () => {
 
   const deletePatient = async (patientIdentifier: string) => {
     try {
-      console.log("______AAAAAAAAA", patientIdentifier);
       const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
       const token = sessionStorage.getItem("token");
       await axios.delete(`/patient/${patientIdentifier}`, {
@@ -184,7 +234,10 @@ const ClientList = () => {
                       <Tooltip title="Add Appointment">
                         <button
                           className="hover:text-primary"
-                          onClick={showModal}
+                          onClick={() => {
+                            setUsedPatientIdentifier(packageItem.identifier);
+                            showModal();
+                          }}
                         >
                           <AddIcon />
                         </button>
@@ -243,20 +296,24 @@ const ClientList = () => {
       >
         <div>
           <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-            <div className="w-full xl:w-1/2">
-              <label className="mb-2.5 block text-black dark:text-white">
-                Appointment Time
-              </label>
-              <input
-                type="time"
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            <div>
+              <DatePicker
+                showTime
+                onChange={handleDateChange}
+                format="YYYY-MM-DD HH:mm:ss"
               />
-            </div>
-            <div className="w-full xl:w-1/2">
-              <Date onDateChange={handleDateChange} />
+              <Button
+                onClick={handleConvert}
+                type="primary"
+                style={{ marginLeft: 8 }}
+              >
+                Convert to ISO
+              </Button>
+              {isoString && (
+                <p style={{ marginTop: 10 }}>
+                  <strong>ISO String:</strong> {isoString}
+                </p>
+              )}
             </div>
           </div>
           <div className="mb-4.5 flex flex-col xl:flex-row">

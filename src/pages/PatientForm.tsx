@@ -136,12 +136,31 @@ const PatientForm = () => {
           HospitalIdentifier: hospitalIdentifier,
         },
       });
-      if (response.status === 200) {
-        message.success("Patient Created ");
-        navigate("/clientList");
-      }
+
+      message.success("Patient Created ");
+      navigate("/clientList");
     } catch (error) {
-      message.error("error in creating user");
+      if (error.response) {
+        console.log(
+          "Error response:",
+          error.response.data,
+          error.response.status,
+        ); // Debugging log
+
+        if (error.response.status === 400) {
+          const errorData = error.response.data;
+
+          // Convert object to a readable error message
+          const errorMessage = Object.values(errorData).join(", ");
+          message.error("Error in creating user: " + errorMessage);
+        } else {
+          message.error("Unexpected error: " + error.response.status);
+        }
+      } else if (error.request) {
+        message.error("No response from server. Please try again.");
+      } else {
+        message.error("Request failed: " + error.message);
+      }
     }
   };
 
@@ -162,18 +181,40 @@ const PatientForm = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
       });
-      if (response.ok) {
-        console.log("Appointment created successfully");
-        message.success("Appointment created successfully");
-      } else {
-        console.log("Failed to create appointment");
-        message.error("Failed to create appointment");
-      }
     } catch (error) {
       console.error("Error creating appointment:", error);
       message.error("Error creating appointment");
+    }
+  };
+
+  const handleCreateAppointment1 = async () => {
+    try {
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+
+      const fromDate = new Date(); // Example: Set the start date dynamically
+      const toDate = new Date(); // Example: Set the end date dynamically
+      const requestBody = {
+        appointmentIdentifier: "11",
+        hospitalIdentifier: hospitalIdentifier,
+        patientIdentifier: "0f360bc8-0dc8-46b0-8d94-e153dbbafdd5",
+        doctorIdentifier: "fac2251e-30ba-4538-9df0-69719ceb7b5d",
+        dateTime: "2025-03-30T17:57:46.999Z",
+        reason: "Mild Concussions",
+        status: "OPEN",
+      };
+
+      const response = await axios.post(`/appointment`, requestBody, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: sessionStorage.getItem("useridentifier"),
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching package data:", error);
+      message.error("Error fetching data");
     }
   };
 
