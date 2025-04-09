@@ -1,23 +1,50 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import LogoDark from '../../images/logo/logo.png';
-import Logo from '../../images/logo/logo.png';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import LogoDark from "../../images/logo/logo.png";
+import Logo from "../../images/logo/logo.png";
+import axios from "axios";
 
 const SignIn: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setusername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Check credentials
-    if (email === 'a@gmail.com' && password === 'a@123') {
-      // Set session storage
-      sessionStorage.setItem('isLoggedIn', 'true');
-      navigate('/'); // Redirect to home page
-    } else {
-      alert('Invalid credentials. Please try again.');
+
+    try {
+      const response = await axios.post(
+        "auth/login",
+        { username, password },
+        { withCredentials: true }, // Include cookies if backend supports session auth
+      );
+      if (response.data) {
+        const {
+          HospitalIdentifier,
+          designation,
+          email,
+          role,
+          token,
+          userIdentifier,
+          username,
+        } = response.data;
+
+        sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("HospitalIdentifier", HospitalIdentifier);
+        sessionStorage.setItem("designation", designation);
+        sessionStorage.setItem("email", email);
+        sessionStorage.setItem("role", role);
+        sessionStorage.setItem("username", username);
+        sessionStorage.setItem("userIdentifier", userIdentifier);
+
+        navigate("/");
+      } else {
+        alert("Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Error during login. Please try again.");
     }
   };
 
@@ -41,18 +68,22 @@ const SignIn: React.FC = () => {
 
             <form onSubmit={handleLogin}>
               <div className="mb-4">
-                <label className="mb-2.5 block font-medium text-black dark:text-white">Email</label>
+                <label className="mb-2.5 block font-medium text-black dark:text-white">
+                  Username
+                </label>
                 <input
-                  type="email"
-                  placeholder="Enter your email"
+                  type="username"
+                  placeholder="Enter your username"
                   className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setusername(e.target.value)}
                 />
               </div>
 
               <div className="mb-6">
-                <label className="mb-2.5 block font-medium text-black dark:text-white">Password</label>
+                <label className="mb-2.5 block font-medium text-black dark:text-white">
+                  Password
+                </label>
                 <input
                   type="password"
                   placeholder="6+ Characters, 1 Capital letter"
@@ -68,15 +99,6 @@ const SignIn: React.FC = () => {
                   value="Sign In"
                   className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                 />
-              </div>
-
-              <div className="mt-6 text-center">
-                <p>
-                  Don’t have an account?{' '}
-                  <Link to="/auth/signup" className="text-primary">
-                    Sign Up
-                  </Link>
-                </p>
               </div>
             </form>
           </div>

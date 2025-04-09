@@ -1,26 +1,42 @@
-import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useLocation} from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-import Loader from './common/Loader';
-import PageTitle from './components/PageTitle';
-import SignIn from './pages/Authentication/SignIn';
-import SignUp from './pages/Authentication/SignUp';
-import Calendar from './pages/Calendar';
-import Chart from './pages/Chart';
-import ECommerce from './pages/Dashboard/ECommerce';
-import FormElements from './pages/Form/FormElements';
-import FormLayout from './pages/Form/FormLayout';
-import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import Tables from './pages/Tables';
-import Alerts from './pages/UiElements/Alerts';
-import Buttons from './pages/UiElements/Buttons';
-import DefaultLayout from './layout/DefaultLayout';
+import Loader from "./common/Loader";
+import PageTitle from "./components/PageTitle";
+import SignIn from "./pages/Authentication/SignIn";
+import SignUp from "./pages/Authentication/SignUp";
+import Calendar from "./pages/Calendar";
+import Chart from "./pages/Chart";
+import ECommerce from "./pages/Dashboard/ECommerce";
+import FormElements from "./pages/Form/FormElements";
+import FormLayout from "./pages/Form/FormLayout";
+import Profile from "./pages/Profile";
+// import Settings from './pages/Settings';
+// import CreateUser from './pages/CreatePatient';
+import PatientForm from "./pages/PatientForm";
+import ReportForm from "./pages/ReportForm";
+import CreateUser from "./pages/CreateUser";
+import Tables from "./pages/Tables";
+import Alerts from "./pages/UiElements/Alerts";
+import Buttons from "./pages/UiElements/Buttons";
+import DefaultLayout from "./layout/DefaultLayout";
+import List from "./pages/List";
+import UserList from "./components/Tables/UserList";
+import ClientList from "./components/Tables/ClientList";
+import MedicinesList from "./components/Tables/MedicinesList";
+import DoctorList from "./components/Tables/DoctorList";
+import CreatePatient from "./pages/CreatePatient";
+import DoctorForm from "./pages/DoctorForm";
+import Appointments from "./components/Tables/Appointments";
+import axios from "axios";
+import ReportGenerate from "./pages/ReportGenerate";
+
+axios.defaults.baseURL = "http://localhost:8081/kskhospital/";
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
-  const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+  const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -61,7 +77,7 @@ function App() {
           path="/profile"
           element={
             <>
-              <PageTitle title="Profile " />
+              <PageTitle title="Profile" />
               <Profile />
             </>
           }
@@ -94,11 +110,119 @@ function App() {
           }
         />
         <Route
-          path="/settings"
+          path="/list"
+          element={
+            <>
+              <PageTitle title="Tables " />
+              <List />
+            </>
+          }
+        />
+        <Route
+          path="/userList"
+          element={
+            <>
+              <PageTitle title="Users" />
+              <UserList />
+            </>
+          }
+        />
+        <Route
+          path="/clientList"
+          element={
+            <>
+              <PageTitle title="Clients" />
+              <ClientList />
+            </>
+          }
+        />
+        <Route
+          path="/medicineList"
+          element={
+            <>
+              <PageTitle title="Pharamacy" />
+              <MedicinesList />
+            </>
+          }
+        />
+        <Route
+          path="/doctorsList"
+          element={
+            <>
+              <PageTitle title="Doctors" />
+              <DoctorList />
+            </>
+          }
+        />
+        <Route
+          path="/patientForm"
+          element={
+            <>
+              <PageTitle title="patientForm " />
+              <PatientForm />
+            </>
+          }
+        />
+        <Route
+          path="/reportForm"
+          element={
+            <>
+              <PageTitle title="reportForm " />
+              <ReportGenerate />
+            </>
+          }
+        />
+        <Route
+          path="/reportgenerate"
+          element={
+            <>
+              <PageTitle title="reportForm " />
+              <ReportGenerate />
+            </>
+          }
+        />
+        <Route
+          path="/appointments"
+          element={
+            <>
+              <PageTitle title="appointments" />
+              <Appointments />
+            </>
+          }
+        />
+        <Route
+          path="/doctorForm"
+          element={
+            <>
+              <PageTitle title="doctorForm " />
+              <DoctorForm />
+            </>
+          }
+        />
+        <Route
+          path="/createPatient"
           element={
             <>
               <PageTitle title="Settings " />
-              <Settings />
+              <CreatePatient />
+            </>
+          }
+        />
+        <Route
+          path="/createUser"
+          element={
+            <>
+              <PageTitle title="Settings " />
+              <CreateUser />
+            </>
+          }
+        />
+        <Route
+          path="/createUser"
+          element={
+            <>
+              <PageTitle title="Settings " />
+              <CreateUser />
             </>
           }
         />
