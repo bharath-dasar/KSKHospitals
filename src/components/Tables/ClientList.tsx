@@ -14,6 +14,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Edit } from "@mui/icons-material";
 import Date from "../Forms/DatePicker/Date";
+import date from "../Forms/DatePicker/Date";
 
 const doctors = [
   { label: "Dr. John Smith", value: "Dr. John Smith" },
@@ -38,7 +39,8 @@ const ClientList = () => {
 
   const handleDateChange = (value) => {
     setSelectedDate(value);
-    setFormData({ ...formData, date: value });
+    console.log("_____AAAAADate", value.toDate().toISOString());
+    setFormData({ ...formData, date: value.toDate().toISOString() });
   };
 
   const handleConvert = () => {
@@ -57,6 +59,7 @@ const ClientList = () => {
     date: "",
     doctorName: "",
     symptoms: "",
+    reason: "",
   });
 
   // Modal state
@@ -68,36 +71,101 @@ const ClientList = () => {
 
   // Testing purpose
   const handleOk = async () => {
-    console.log("Form Data:", formData);
     try {
       const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
       const token = sessionStorage.getItem("token");
+      const currentUserId = sessionStorage.getItem("userIdentifier");
 
-      const fromDate = new Date(); // Example: Set the start date dynamically
-      const toDate = new Date(); // Example: Set the end date dynamically
+      if (!hospitalIdentifier || !token || !currentUserId) {
+        message.error("Authentication information is missing");
+        return;
+      }
+
+      if (!usedPatientIdentifier || !usedDoctorIdentifier) {
+        message.error("Patient and Doctor information is required");
+        return;
+      }
+
       const requestBody = {
-        appointmentIdentifier: "",
+        appointmentIdentifier: crypto.randomUUID(),
         hospitalIdentifier: hospitalIdentifier,
         patientIdentifier: usedPatientIdentifier,
         doctorIdentifier: usedDoctorIdentifier,
-        dateTime: "2025-03-30T17:57:46.999Z",
-        reason: "Mild Concussions",
+        dateTime: formData.date,
+        reason: formData.reason || "General Checkup",
         status: "OPEN",
       };
 
-      await axios.post(`/appointment`, requestBody, {
+      const response = await axios.post(`/appointment`, requestBody, {
         headers: {
           Authorization: `Bearer ${token}`,
-          CurrentUserId: sessionStorage.getItem("useridentifier"),
+          CurrentUserId: currentUserId,
           HospitalIdentifier: hospitalIdentifier,
         },
       });
-      setIsModalOpen(false);
+
+      if (response.status === 200 || response.status === 201) {
+        message.success("Appointment created successfully");
+        setIsModalOpen(false);
+        // Optionally refresh the list or update UI
+      }
     } catch (error) {
-      console.error("Error fetching package data:", error);
-      message.error("Error fetching data");
+      console.error("Error creating appointment:", error);
+      message.error("Failed to create appointment. Please try again.");
     }
   };
+
+  const testHandleOk = async () => {
+    try {
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+      const currentUserId = sessionStorage.getItem("userIdentifier");
+
+      if (!hospitalIdentifier || !token || !currentUserId) {
+        message.error("Authentication information is missing");
+        console.error(
+          "Error creating appointment:",
+          hospitalIdentifier,
+          token,
+          currentUserId,
+        );
+        return;
+      }
+
+      // Predefined test values
+      const testRequestBody = {
+        appointmentIdentifier: crypto.randomUUID(),
+        hospitalIdentifier: hospitalIdentifier,
+        patientIdentifier: usedPatientIdentifier, // Test patient ID
+        doctorIdentifier: "e71d286f-5d8b-4ea0-b84d-d8ea5c6cac3c", // Test doctor ID
+        dateTime: formData.date, // Future test date
+        reason: formData.symptoms || "General Checkup",
+        status: "OPEN",
+      };
+
+      console.log("Test Request Body:", testRequestBody);
+
+      const response = await axios.post(`/appointment`, testRequestBody, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: currentUserId,
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        message.success("Test appointment created successfully");
+        console.log("Test Response:", response.data);
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error creating test appointment:", error);
+      message.error(
+        "Failed to create test appointment. Please check console for details.",
+      );
+    }
+  };
+
   const handleDoctorSearch = (value: string) => {
     setFilteredDoctors(
       doctors.filter((doctor) =>
@@ -131,6 +199,7 @@ const ClientList = () => {
         },
       );
       const data: PackagePatient[] = response.data;
+      console.log(response.data);
       setPackageData(data);
       setTotalPages(Math.ceil(data.length / pageSize));
     } catch (error) {
@@ -235,7 +304,9 @@ const ClientList = () => {
                         <button
                           className="hover:text-primary"
                           onClick={() => {
-                            setUsedPatientIdentifier(packageItem.identifier);
+                            setUsedPatientIdentifier(
+                              packageItem.patientIdentifier,
+                            );
                             showModal();
                           }}
                         >
@@ -253,7 +324,9 @@ const ClientList = () => {
                       <Tooltip title="Delete Patient">
                         <button
                           className="hover:text-primary"
-                          onClick={() => deletePatient(packageItem.identifier)}
+                          onClick={() =>
+                            deletePatient(packageItem.patientIdentifier)
+                          }
                         >
                           <DeleteIcon />
                         </button>
@@ -302,13 +375,6 @@ const ClientList = () => {
                 onChange={handleDateChange}
                 format="YYYY-MM-DD HH:mm:ss"
               />
-              <Button
-                onClick={handleConvert}
-                type="primary"
-                style={{ marginLeft: 8 }}
-              >
-                Convert to ISO
-              </Button>
               {isoString && (
                 <p style={{ marginTop: 10 }}>
                   <strong>ISO String:</strong> {isoString}
@@ -350,7 +416,7 @@ const ClientList = () => {
           <div className="mb-6">
             <button
               type="button"
-              // onClick={handleCreateAppointment}
+              onClick={testHandleOk}
               className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
               Schedule Appointment

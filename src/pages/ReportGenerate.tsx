@@ -45,7 +45,7 @@ const ReportGenerate = () => {
   const fetchDiseaseImage = async (pointIndex) => {
     try {
       const token = sessionStorage.getItem("token");
-      const hospitalIdentifier = sessionStorage.getItem("hospitalIdentifier");
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
       const currentUserId = sessionStorage.getItem("useridentifier");
 
       const response = await axios.get(`/user/process/${pointIndex}`, {

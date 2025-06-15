@@ -6,7 +6,7 @@ export type Package = {
   role: string;
 };
 export type PackagePatient = {
-  identifier: string;
+  patientIdentifier: string;
   username: string; // Combine first and last name
   // age: number;
   phone: string; // Ensure to add this if needed

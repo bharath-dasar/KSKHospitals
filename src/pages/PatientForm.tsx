@@ -176,19 +176,82 @@ const PatientForm = () => {
 
   const handleCreateAppointment = async () => {
     try {
-      const response = await fetch("/api/createAppointment", {
-        method: "POST",
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+      const currentUserId = sessionStorage.getItem("userIdentifier");
+
+      if (!hospitalIdentifier || !token || !currentUserId) {
+        message.error("Authentication information is missing");
+        return;
+      }
+
+      // Validate required fields
+      if (!formData.doctorName || !formData.time || !formData.symptoms) {
+        message.error("Please fill in all required fields");
+        return;
+      }
+
+      const requestBody = {
+        appointmentIdentifier: crypto.randomUUID(),
+        hospitalIdentifier: hospitalIdentifier,
+        patientIdentifier: currentUserId,
+        doctorIdentifier: formData.doctorName,
+        dateTime: formData.time,
+        reason: formData.symptoms,
+        status: "OPEN",
+      };
+
+      const response = await axios.post(`/appointment`, requestBody, {
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: currentUserId,
+          HospitalIdentifier: hospitalIdentifier,
         },
       });
+
+      if (response.status === 200 || response.status === 201) {
+        message.success("Appointment created successfully");
+        // Reset form after successful submission
+        setFormData({
+          fullName: "",
+          phoneNumber: "",
+          email: "",
+          age: "",
+          dateOfBirth: "",
+          address: "",
+          medicalHistory: "",
+          time: "",
+          doctorName: "",
+          symptoms: "",
+          height: "",
+          weight: "",
+          bloodPressure: "",
+          pulse: "",
+          randomBloodSugar: "",
+          bmi: "",
+          bodyFat: "",
+          visceralFat: "",
+          skeletalMuscle: "",
+          boneMass: "",
+          bmr: "",
+          bodyWater: "",
+          bodyTemperature: "",
+          gender: "",
+          addressLine1: "",
+          addressLine2: "",
+          city: "",
+          state: "",
+          country: "",
+          postalCode: "",
+        });
+      }
     } catch (error) {
       console.error("Error creating appointment:", error);
-      message.error("Error creating appointment");
+      message.error("Failed to create appointment. Please try again.");
     }
   };
 
-  const handleCreateAppointment1 = async () => {
+  const testHandleCreateAppointment1 = async () => {
     try {
       const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
       const token = sessionStorage.getItem("token");

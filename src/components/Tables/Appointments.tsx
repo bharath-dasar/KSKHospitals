@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { message, Table } from "antd";
+import { message, Table, Tooltip } from "antd";
 import { useNavigate } from "react-router-dom"; // React Router v6
 import type { ColumnsType } from "antd/es/table";
 import axios from "axios";
@@ -81,44 +81,62 @@ const Appointments: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchPackageData = async () => {
-      try {
-        const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
-        const token = sessionStorage.getItem("token");
-
-        // Get current date
-        const today = new Date();
-
-        // Set fromDate to one day before today
-        const fromDate = new Date(today);
-        fromDate.setDate(today.getDate() - 1); // Subtract 1 day
-        const fromDateISO = fromDate.toISOString();
-
-        // Set toDate to one day after today
-        const toDate = new Date(today);
-        toDate.setDate(today.getDate() + 1); // Add 1 day
-        const toDateISO = toDate.toISOString();
-
-        const response = await axios.get<Appointment[]>(`/appointment/getAll`, {
-          params: { from: fromDateISO, to: toDateISO },
-          headers: {
-            Authorization: `Bearer ${token}`,
-            CurrentUserId: sessionStorage.getItem("useridentifier"),
-            HospitalIdentifier: hospitalIdentifier,
-          },
-        });
-        console.log("__AAAresponse", response.data);
-        const data: Appointment[] = response.data;
-        setAppointments(data); // Assuming you have a state like `const [appointments, setAppointments] = useState<Appointment[]>([])`
-        setTotalPages(Math.ceil(data.length / pageSize));
-      } catch (error) {
-        console.error("Error fetching package data:", error);
-        message.error("Error fetching data");
-      }
-    };
-
     fetchPackageData();
   }, []);
+
+  const fetchPackageData = async () => {
+    try {
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+
+      // Get current date
+      const today = new Date();
+
+      // Set fromDate to one day before today
+      const fromDate = new Date(today);
+      fromDate.setDate(today.getDate() - 1); // Subtract 1 day
+      const fromDateISO = fromDate.toISOString();
+
+      // Set toDate to one day after today
+      const toDate = new Date(today);
+      toDate.setDate(today.getDate() + 1); // Add 1 day
+      const toDateISO = toDate.toISOString();
+
+      const response = await axios.get<Appointment[]>(`/appointment/getAll`, {
+        params: { from: fromDateISO, to: toDateISO },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: sessionStorage.getItem("useridentifier"),
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+      console.log("__AAAresponse", response.data);
+      const data: Appointment[] = response.data;
+      setAppointments(data); // Assuming you have a state like `const [appointments, setAppointments] = useState<Appointment[]>([])`
+      setTotalPages(Math.ceil(data.length / pageSize));
+    } catch (error) {
+      console.error("Error fetching package data:", error);
+      message.error("Error fetching data");
+    }
+  };
+
+  const deleteAppointment = async (tokenNumber: string) => {
+    try {
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+      await axios.delete(`/appointment/${tokenNumber}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: sessionStorage.getItem("useridentifier"),
+          HospitalIdentifier: hospitalIdentifier,
+          AppointmentIdentifier: tokenNumber,
+        },
+      });
+      fetchPackageData();
+    } catch (error) {
+      message.error("Error fetching data");
+    }
+  };
 
   const handleRowClick = (record: Appointment) => {
     navigate(
@@ -195,9 +213,16 @@ const Appointments: React.FC = () => {
                       <button className="hover:text-primary">
                         <RemoveRedEyeIcon />
                       </button>
-                      <button className="hover:text-primary">
-                        <DeleteIcon />
-                      </button>
+                      <Tooltip title="Delete Patient">
+                        <button
+                          className="hover:text-primary"
+                          onClick={() =>
+                            deleteAppointment(appointment.tokenNumber)
+                          }
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>

@@ -31,7 +31,7 @@ import Appointments from "./components/Tables/Appointments";
 import axios from "axios";
 import ReportGenerate from "./pages/ReportGenerate";
 
-axios.defaults.baseURL = "http://localhost:8081/kskhospital/";
+axios.defaults.baseURL = "https://kskhospital.prime5d.in/kskhospital/";
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);

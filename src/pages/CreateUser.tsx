@@ -37,7 +37,7 @@ const CreateUser = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const calculateAge = (dob: string): number => {
+  const calculateAge = (dob: string) => {
     const birthDate = new Date(dob);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -48,12 +48,15 @@ const CreateUser = () => {
     ) {
       age--;
     }
-    return age;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      age: age.toString(),
+      dob: dob,
+    }));
   };
 
   const handleDateChange = (date: string) => {
-    setFormData({ ...formData, dob: date });
-    setFormData({ ...formData, age: calculateAge(date).toString() });
+    calculateAge(date);
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -111,7 +114,7 @@ const CreateUser = () => {
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
             <h3 className="font-medium text-black dark:text-white">
-              Patient Form
+              User Form
             </h3>
           </div>
           <form onSubmit={handleCreateUser}>
