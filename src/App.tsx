@@ -30,6 +30,7 @@ import DoctorForm from "./pages/DoctorForm";
 import Appointments from "./components/Tables/Appointments";
 import axios from "axios";
 import ReportGenerate from "./pages/ReportGenerate";
+import ApiTesting from "./pages/ApiTesting";
 
 axios.defaults.baseURL = "https://kskhospital.prime5d.in/kskhospital/";
 
@@ -218,11 +219,11 @@ function App() {
           }
         />
         <Route
-          path="/createUser"
+          path="/apiTesting"
           element={
             <>
-              <PageTitle title="Settings " />
-              <CreateUser />
+              <PageTitle title="API Testing" />
+              <ApiTesting />
             </>
           }
         />
