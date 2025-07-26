@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 // import Settings from './pages/Settings';
 // import CreateUser from './pages/CreatePatient';
 import PatientForm from "./pages/PatientForm";
+import EditPatient from "./pages/EditPatient";
 import ReportForm from "./pages/ReportForm";
 import CreateUser from "./pages/CreateUser";
 import Tables from "./pages/Tables";
@@ -161,6 +162,15 @@ function App() {
             <>
               <PageTitle title="patientForm " />
               <PatientForm />
+            </>
+          }
+        />
+        <Route
+          path="/editPatient/:userIdentifier"
+          element={
+            <>
+              <PageTitle title="Edit Patient" />
+              <EditPatient />
             </>
           }
         />
