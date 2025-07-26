@@ -1,6 +1,12 @@
 import { AutoComplete, message } from 'antd';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+interface Doctor {
+  label: string;
+  value: string;
+}
 
 const doctors = [
   { label: 'Cardiology', value: 'Cardiology' },
@@ -16,7 +22,47 @@ const DoctorForm = () => {
     specialization: '',
     experience: 0,
   });
+  
+  const [apiDoctors, setApiDoctors] = useState<Doctor[]>([]);
   const navigate = useNavigate(); 
+
+  // Fetch doctors from API
+  const fetchDoctors = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        console.error("Token is missing in sessionStorage");
+        return;
+      }
+
+      const designationIdentifier = "a45f6bce-72cc-4be4-b70f-519b89eec3df";
+      
+      const response = await axios.get(`/user/filterUserByDesignation/${designationIdentifier}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data && Array.isArray(response.data)) {
+        const doctorsList: Doctor[] = response.data.map((user: any) => ({
+          label: `Dr. ${user.name}`,
+          value: user.identifier
+        }));
+        
+        setApiDoctors(doctorsList);
+        console.log("Doctors fetched successfully:", doctorsList);
+      }
+    } catch (error: any) {
+      console.error("Error fetching doctors:", error);
+      message.error("Failed to fetch doctors. Please contact admin.");
+      setApiDoctors([]);
+    }
+  };
+
+  // Fetch doctors on component mount
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

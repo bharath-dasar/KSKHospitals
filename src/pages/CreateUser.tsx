@@ -24,7 +24,7 @@ const CreateUser = () => {
     retypePassword: "",
     phone: "",
   });
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<{identifier: string, name: string} | null>(null);
   const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false);
   const [designations, setDesignations] = useState<Array<{identifier: string, name: string}>>([]);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
@@ -75,7 +75,7 @@ const CreateUser = () => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -150,7 +150,7 @@ const CreateUser = () => {
       age: formData.age,
       name: formData.name,
       email: formData.email,
-      role: selectedOption,
+      designation: selectedOption,
       password: formData.password, //tbd
       phone: formData.phoneNumber,
       address: {
@@ -162,7 +162,6 @@ const CreateUser = () => {
         postalCode: formData.postalCode,
       },
       hospitalIdentifier: sessionStorage.getItem("HospitalIdentifier"),
-      designation: formData.designation,
     };
     try {
       const response = await axios.post("/user", requestBody, {
@@ -359,29 +358,35 @@ const CreateUser = () => {
               <div className="flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-1/2">
                   <label className="mb-2.5 block text-black dark:text-white">
-                    Designation
+                    Role
                   </label>
-                  <input
-                    type="text"
-                    name="designation"
-                    placeholder="Enter your Designation"
-                    value={formData.designation}
+                  <select
+                    name="role"
+                    value={formData.role}
                     onChange={handleChange}
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
+                  >
+                    <option value="" disabled>
+                      Select your Role
+                    </option>
+                    <option value="MEMBER">MEMBER</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="OWNER">OWNER</option>
+                  </select>
                 </div>
                 <div className="w-full xl:w-1/2">
                   <div className="mb-4.5">
                     <label className="mb-2.5 block text-black dark:text-white">
                       {" "}
-                      Role{" "}
+                      Designation{" "}
                     </label>
 
                     <div className="relative z-20 bg-transparent dark:bg-form-input">
                       <select
-                        value={selectedOption}
+                        value={selectedOption?.identifier || ""}
                         onChange={(e) => {
-                          setSelectedOption(e.target.value);
+                          const selectedDesignation = designations.find(d => d.identifier === e.target.value);
+                          setSelectedOption(selectedDesignation || null);
                           changeTextColor();
                         }}
                         className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
@@ -393,12 +398,12 @@ const CreateUser = () => {
                           disabled
                           className="text-body dark:text-bodydark"
                         >
-                          Select your Role
+                          Select your Designation
                         </option>
                         {designations.map((designation) => (
                           <option
                             key={designation.identifier}
-                            value={designation.name}
+                            value={designation.identifier}
                             className="text-body dark:text-bodydark"
                           >
                             {designation.name}

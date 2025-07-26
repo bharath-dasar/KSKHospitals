@@ -1,172 +1,172 @@
-import { useEffect, useState } from 'react';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Doctor } from '../../types/doctor'; // Define the Doctor type with fields like id, lastName, firstName, specialization, experience
-import { Button } from 'antd';
-import { useNavigate } from 'react-router-dom';
 
-const data: Doctor[] = [
-  { id: 1, lastName: 'Smith', firstName: 'John', specialization: 'Cardiology', experience: 15 },
-  { id: 2, lastName: 'Johnson', firstName: 'Emily', specialization: 'Neurology', experience: 10 },
-  { id: 3, lastName: 'Williams', firstName: 'Michael', specialization: 'Orthopedics', experience: 8 },
-  { id: 4, lastName: 'Brown', firstName: 'Sarah', specialization: 'Pediatrics', experience: 12 },
-  { id: 5, lastName: 'Jones', firstName: 'David', specialization: 'Dermatology', experience: 20 },
-  { id: 6, lastName: 'Garcia', firstName: 'Laura', specialization: 'Oncology', experience: 11 },
-  { id: 7, lastName: 'Martinez', firstName: 'Chris', specialization: 'Radiology', experience: 7 },
-  { id: 8, lastName: 'Davis', firstName: 'Jessica', specialization: 'Gastroenterology', experience: 9 },
-  { id: 9, lastName: 'Lopez', firstName: 'Daniel', specialization: 'Urology', experience: 14 },
-  { id: 10, lastName: 'Gonzalez', firstName: 'Sophia', specialization: 'Ophthalmology', experience: 5 },
-  { id: 11, lastName: 'Wilson', firstName: 'James', specialization: 'ENT', experience: 6 },
-  { id: 12, lastName: 'Anderson', firstName: 'Linda', specialization: 'Rheumatology', experience: 13 },
-  { id: 13, lastName: 'Thomas', firstName: 'Robert', specialization: 'Pulmonology', experience: 18 },
-  { id: 14, lastName: 'Moore', firstName: 'Patricia', specialization: 'Nephrology', experience: 16 },
-  { id: 15, lastName: 'Taylor', firstName: 'Jennifer', specialization: 'Psychiatry', experience: 4 },
-];
-const DoctorsList = () => {
+interface Doctor {
+  identifier: string;
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  address: {
+    addressLine1: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+  };
+  designationDetails: string;
+  designation: {
+    identifier: string;
+    name: string;
+  };
+}
+
+const DoctorList = () => {
   const [doctorData, setDoctorData] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate(); 
-
-
-  const pageSize = 7;
-  // Fetch doctor data
   useEffect(() => {
     const fetchDoctorData = async () => {
       try {
-        const response = await axios.get('/api/doctors'); // Replace with the doctors API endpoint
-        const data: Doctor[] = response.data;
-        setDoctorData(data);
-        setTotalPages(Math.ceil(data.length / pageSize));
+        setLoading(true);
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+          console.error("Token is missing in sessionStorage");
+          return;
+        }
+
+        const designationIdentifier = "a45f6bce-72cc-4be4-b70f-519b89eec3df";
+        const response = await axios.get(`/user/filterUserByDesignation/${designationIdentifier}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data && Array.isArray(response.data)) {
+          const data: Doctor[] = response.data;
+          setDoctorData(data);
+          setTotalPages(Math.ceil(data.length / pageSize));
+        }
       } catch (error) {
-        setDoctorData(data);
-        setTotalPages(Math.ceil(data.length / pageSize));
         console.error('Error fetching doctor data:', error);
+        setDoctorData([]);
+        setTotalPages(0);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDoctorData();
-  }, []);
-
-  // Get paginated data
-  const paginatedData = doctorData.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  }, [pageSize]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  const redirectToCreatePatient = () => {
-    navigate('/doctorForm'); 
-  };
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentDoctors = doctorData.slice(startIndex, endIndex);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Loading doctors...</div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-<div className="flex justify-end py-4">
-        <Button
-          type="primary"
-          onClick={redirectToCreatePatient}
-          className="inline-flex items-center justify-center bg-primary py-2 px-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-4"
-        >
-          Create Doctor
-        </Button>
-      </div>
-<div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-
+    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[20px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Id
+              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+                Doctor Name
               </th>
               <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                Last name
+                Email
               </th>
               <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                First Name
+                Phone
               </th>
               <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                Specialization
+                Role
               </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Experience (years)
+              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                Designation
               </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Actions
+              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                City
+              </th>
+              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                State
               </th>
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((doctor, key) => (
-              <tr key={key}>
+            {currentDoctors.map((doctor, index) => (
+              <tr key={doctor.identifier}>
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
-                    {doctor.id}
+                    Dr. {doctor.name}
                   </h5>
+                  <p className="text-sm">{doctor.designationDetails || 'No details'}</p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {doctor.lastName}
-                  </p>
+                  <p className="text-black dark:text-white">{doctor.email}</p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {doctor.firstName}
-                  </p>
+                  <p className="text-black dark:text-white">{doctor.phone}</p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {doctor.specialization}
-                  </p>
+                  <p className="text-black dark:text-white">{doctor.role}</p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {doctor.experience}
-                  </p>
+                  <p className="text-black dark:text-white">{doctor.designation?.name || 'N/A'}</p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <div className="flex items-center space-x-3.5">
-                    <button className="hover:text-primary">
-                      <RemoveRedEyeIcon />
-                    </button>
-                    <button className="hover:text-primary">
-                      <DeleteIcon />
-                    </button>
-                  </div>
+                  <p className="text-black dark:text-white">{doctor.address?.city || 'N/A'}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">{doctor.address?.state || 'N/A'}</p>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-
-        {/* Pagination Controls */}
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`py-2 px-4 ${currentPage === 1 ? 'opacity-50' : ''}`}
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`py-2 px-4 ${currentPage === totalPages ? 'opacity-50' : ''}`}
-          >
-            Next
-          </button>
-        </div>
       </div>
-    </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, doctorData.length)} of {doctorData.length} doctors
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="px-3 py-1">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default DoctorsList;
+export default DoctorList;

@@ -104,16 +104,15 @@ const PatientForm = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.data && Array.isArray(response.data)) {
         const doctorsList: Doctor[] = response.data.map((user: any) => ({
-          label: user.name || `Dr. ${user.name}`,
-          value: user.identifier || user.name
+          label: `Dr. ${user.name}`,
+          value: user.identifier
         }));
         
         setDoctors(doctorsList);
         setFilteredDoctors(doctorsList);
-        console.log("Doctors fetched successfully:", doctorsList);
+        console.log("Doctors fetched successfully:", response);
       }
     } catch (error: any) {
       console.error("Error fetching doctors:", error);
