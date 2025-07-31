@@ -8,6 +8,7 @@ import AirlineSeatIndividualSuiteIcon from '@mui/icons-material/AirlineSeatIndiv
 import ContactEmergencyOutlinedIcon from '@mui/icons-material/ContactEmergencyOutlined';
 import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 import VaccinesOutlinedIcon from '@mui/icons-material/VaccinesOutlined';
+import ImageIcon from '@mui/icons-material/Image';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -185,6 +186,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 >
                 <VaccinesOutlinedIcon/>
                 Medicines
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/pixelMarker"
+                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                    (pathname === '/pixelMarker' ||
+                      pathname.includes('pixelMarker')) &&
+                    'bg-graydark dark:bg-meta-4'
+                  }`}
+                >
+                <ImageIcon/>
+                Image Marker
                 </NavLink>
               </li>
             </ul>
