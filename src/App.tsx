@@ -34,6 +34,8 @@ import axios from "axios";
 import ReportGenerate from "./pages/ReportGenerate";
 import ApiTesting from "./pages/ApiTesting";
 import PixelMarker from "./pages/PixelMarker";
+import CreateBed from "./pages/CreateBed";
+import BedsList from "./components/Tables/BedsList";
 
 axios.defaults.baseURL = "https://kskhospital.prime5d.in/kskhospital/";
 
@@ -254,6 +256,24 @@ function App() {
             <>
               <PageTitle title="Image Pixel Marker" />
               <PixelMarker />
+            </>
+          }
+        />
+        <Route
+          path="/createBed"
+          element={
+            <>
+              <PageTitle title="Create Bed" />
+              <CreateBed />
+            </>
+          }
+        />
+        <Route
+          path="/bedsList"
+          element={
+            <>
+              <PageTitle title="Beds List" />
+              <BedsList />
             </>
           }
         />
