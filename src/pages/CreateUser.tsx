@@ -153,6 +153,7 @@ const CreateUser = () => {
       designation: selectedOption,
       password: formData.password, //tbd
       phone: formData.phoneNumber,
+      role: formData.role,
       address: {
         addressLine1: formData.addressLine1,
         addressLine2: formData.addressLine2,
