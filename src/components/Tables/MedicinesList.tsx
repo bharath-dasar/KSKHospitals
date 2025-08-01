@@ -20,52 +20,32 @@ const MedicalList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
+  const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMedicalData = async () => {
       try {
-        const response = await axios.get('/api/medicallist'); // Replace with your API URL
-        const data: MedicalItem[] = response.data;
-        setMedicalData(data);
-        setTotalPages(Math.ceil(data.length / pageSize));
+        // Since medicine API might not exist, we'll show empty data for now
+        // You can replace this with the actual medicine API when available
+        setMedicalData([]);
+        setTotalPages(1);
+        console.log('Medicine API not implemented yet');
       } catch (error) {
+        setMedicalData([]);
+        setTotalPages(1);
         console.error('Error fetching medical data:', error);
-        // Fallback data for testing
-        const fallbackData: MedicalItem[] = [
-          {
-            id: 1,
-            medicineName: 'Paracetamol',
-            dosage: '500mg',
-            manufacturer: 'XYZ Pharma',
-            expiryDate: '2025-12-01',
-            quantity: 100,
-          },
-          {
-            id: 2,
-            medicineName: 'Ibuprofen',
-            dosage: '200mg',
-            manufacturer: 'ABC Pharma',
-            expiryDate: '2024-06-15',
-            quantity: 50,
-          },
-          {
-            id: 3,
-            medicineName: 'Amoxicillin',
-            dosage: '250mg',
-            manufacturer: 'PQR Pharma',
-            expiryDate: '2023-11-10',
-            quantity: 30,
-          },
-        ];
-        setMedicalData(fallbackData);
-        setTotalPages(Math.ceil(fallbackData.length / pageSize));
       }
     };
-
     fetchMedicalData();
-  }, []);
+    const handler = () => {
+      setSelectedHospital(sessionStorage.getItem('selectedHospital') || 'ALL');
+      setCurrentPage(1);
+    };
+    window.addEventListener('hospitalChanged', handler);
+    return () => window.removeEventListener('hospitalChanged', handler);
+  }, [selectedHospital]);
 
   const paginatedData = medicalData.slice(
     (currentPage - 1) * pageSize,

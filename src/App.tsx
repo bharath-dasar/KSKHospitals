@@ -31,6 +31,7 @@ import Appointments from "./components/Tables/Appointments";
 import axios from "axios";
 import ReportGenerate from "./pages/ReportGenerate";
 import ApiTesting from "./pages/ApiTesting";
+import Hospitals from "./pages/Hospitals";
 
 axios.defaults.baseURL = "https://kskhospital.prime5d.in/kskhospital/";
 
@@ -270,6 +271,19 @@ function App() {
               <PageTitle title="Signup " />
               <SignUp />
             </>
+          }
+        />
+        <Route
+          path="/hospitals"
+          element={
+            isLoggedIn ? (
+              <>
+                <PageTitle title="Hospitals" />
+                <Hospitals />
+              </>
+            ) : (
+              <Navigate to="/auth/signin" />
+            )
           }
         />
       </Routes>

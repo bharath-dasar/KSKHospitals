@@ -12,6 +12,7 @@ const UserList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
   const navigate = useNavigate();
+  const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
 
   const fetchPackageData = async () => {
     const token = sessionStorage.getItem("token");
@@ -20,19 +21,19 @@ const UserList = () => {
       return;
     }
     try {
-      const response = await axios.get(
-        sessionStorage.getItem("role") === "SUPERUSER"
-          ? "user/getAll"
-          : "user/getAll/hospital",
-        {
-          headers: {
-            "Content-Type": "application/json",
-            CurrentUserId: sessionStorage.getItem("useridentifier"),
-            Authorization: `Bearer ${token}`,
-          },
+      let url = '';
+      if (selectedHospital === 'ALL') {
+        url = 'user/getAll';
+      } else {
+        url = `user/getAll/hospital/${selectedHospital}`;
+      }
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+          CurrentUserId: sessionStorage.getItem("useridentifier"),
+          Authorization: `Bearer ${token}`,
         },
-      );
-
+      });
       const data = response.data;
       setPackageData(Array.isArray(data) ? data : []);
       setTotalPages(Math.ceil(data.length / pageSize));
@@ -53,7 +54,13 @@ const UserList = () => {
 
   useEffect(() => {
     fetchPackageData();
-  }, []);
+    const handler = () => {
+      setSelectedHospital(sessionStorage.getItem('selectedHospital') || 'ALL');
+      setCurrentPage(1);
+    };
+    window.addEventListener('hospitalChanged', handler);
+    return () => window.removeEventListener('hospitalChanged', handler);
+  }, [selectedHospital]);
 
   function userdelete(identifier: string) {
     const deleteFunc = async () => {

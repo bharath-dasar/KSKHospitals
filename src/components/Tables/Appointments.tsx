@@ -67,6 +67,7 @@ const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
 
   const navigate = useNavigate();
 
@@ -82,38 +83,59 @@ const Appointments: React.FC = () => {
 
   useEffect(() => {
     fetchPackageData();
-  }, []);
+    const handler = () => {
+      setSelectedHospital(sessionStorage.getItem('selectedHospital') || 'ALL');
+      setCurrentPage(1);
+    };
+    window.addEventListener('hospitalChanged', handler);
+    return () => window.removeEventListener('hospitalChanged', handler);
+  }, [selectedHospital]);
 
   const fetchPackageData = async () => {
     try {
-      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
       const token = sessionStorage.getItem("token");
-
-      // Get current date
       const today = new Date();
-
-      // Set fromDate to one day before today
       const fromDate = new Date(today);
-      fromDate.setDate(today.getDate() - 1); // Subtract 1 day
+      fromDate.setDate(today.getDate() - 1);
       const fromDateISO = fromDate.toISOString();
-
-      // Set toDate to one day after today
       const toDate = new Date(today);
-      toDate.setDate(today.getDate() + 1); // Add 1 day
+      toDate.setDate(today.getDate() + 1);
       const toDateISO = toDate.toISOString();
-
-      const response = await axios.get<Appointment[]>(`/appointment/getAll`, {
+      
+      // Fetch all appointments first
+      const response = await axios.get('/appointment/getAll', {
         params: { from: fromDateISO, to: toDateISO },
         headers: {
           Authorization: `Bearer ${token}`,
           CurrentUserId: sessionStorage.getItem("useridentifier"),
-          HospitalIdentifier: hospitalIdentifier,
         },
       });
-      console.log("__AAAresponse", response.data);
-      const data: Appointment[] = response.data;
-      setAppointments(data); // Assuming you have a state like `const [appointments, setAppointments] = useState<Appointment[]>([])`
-      setTotalPages(Math.ceil(data.length / pageSize));
+      
+      let allAppointments: Appointment[] = response.data;
+      
+      // If a specific hospital is selected, filter appointments by hospital
+      if (selectedHospital !== 'ALL') {
+        try {
+          // Fetch all users for the selected hospital
+          const usersResponse = await axios.get(`/user/getAll/hospital/${selectedHospital}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          // Create a set of doctor identifiers from the selected hospital
+          const hospitalDoctorIds = new Set(usersResponse.data.map((user: any) => user.identifier));
+          
+          // Filter appointments to only include those where the doctor is from the selected hospital
+          allAppointments = allAppointments.filter(appointment => 
+            hospitalDoctorIds.has(appointment.doctorIdentifier)
+          );
+        } catch (error) {
+          console.error("Error fetching hospital users:", error);
+          // If we can't fetch hospital users, show all appointments
+        }
+      }
+      
+      setAppointments(allAppointments);
+      setTotalPages(Math.ceil(allAppointments.length / pageSize));
     } catch (error) {
       console.error("Error fetching package data:", error);
       message.error("Error fetching data");
