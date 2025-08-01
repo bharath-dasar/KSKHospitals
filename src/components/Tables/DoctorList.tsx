@@ -8,6 +8,7 @@ const DoctorsList = () => {
   const [doctorData, setDoctorData] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
   const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
   const pageSize = 7;
   const navigate = useNavigate();
@@ -55,6 +56,8 @@ const DoctorsList = () => {
     };
     fetchDoctorData();
   }, [pageSize]);
+
+  useEffect(() => {
     const handler = () => {
       setSelectedHospital(sessionStorage.getItem('selectedHospital') || 'ALL');
       setCurrentPage(1);
@@ -177,4 +180,4 @@ const DoctorsList = () => {
   );
 };
 
-export default DoctorList;
+export default DoctorsList;

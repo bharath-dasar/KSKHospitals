@@ -56,8 +56,6 @@ const ClientList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<PackagePatient | null>(null);
 
-  const navigate = useNavigate();
-
   // Modal handlers
   const showModal = (patient: PackagePatient) => {
     setSelectedPatient(patient);
