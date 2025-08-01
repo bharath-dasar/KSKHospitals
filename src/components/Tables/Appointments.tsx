@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { message, Table, Tooltip, Modal } from "antd";
+import { message, Table, Tooltip, Modal, DatePicker, Button } from "antd";
 import { useNavigate } from "react-router-dom"; // React Router v6
 import type { ColumnsType } from "antd/es/table";
 import axios from "axios";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import DeleteIcon from "@mui/icons-material/Delete";
+import dayjs, { Dayjs } from "dayjs";
 
 // Define the Appointment Interface
 interface Appointment {
@@ -33,42 +34,15 @@ const formatDate = (isoString: string): string => {
     .replace(",", ""); // Remove the comma
 };
 
-// Define Table Columns for Appointments
-const columns: ColumnsType<Appointment> = [
-  {
-    title: "Patient Name",
-    dataIndex: "patientName",
-    key: "patientName",
-  },
-  {
-    title: "Doctor Name",
-    dataIndex: "doctorName",
-    key: "doctorName",
-  },
-  {
-    title: "Appointment Date",
-    dataIndex: "date",
-    key: "date",
-    render: (date: string) => formatDate(date),
-  },
-  {
-    title: "Symptoms",
-    dataIndex: "reason",
-    key: "reason",
-  },
-  {
-    title: "Status",
-    dataIndex: "status",
-    key: "status",
-  },
-];
-
 // Main Appointments Component
 const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
+  const [loading, setLoading] = useState(false);
+  const [fromDate, setFromDate] = useState<Dayjs>(dayjs('2025-08-01').startOf('day'));
+  const [toDate, setToDate] = useState<Dayjs>(dayjs('2025-08-31').endOf('day'));
 
   const navigate = useNavigate();
 
@@ -94,16 +68,14 @@ const Appointments: React.FC = () => {
 
   const fetchPackageData = async () => {
     try {
+      setLoading(true);
       const token = sessionStorage.getItem("token");
-      const today = new Date();
-      const fromDate = new Date(today);
-      fromDate.setDate(today.getDate() - 1);
+      
+      // Use date range for API call
       const fromDateISO = fromDate.toISOString();
-      const toDate = new Date(today);
-      toDate.setDate(today.getDate() + 1);
       const toDateISO = toDate.toISOString();
       
-      // Fetch all appointments first
+      // Fetch appointments with date range
       const response = await axios.get('/appointment/getAll', {
         params: { from: fromDateISO, to: toDateISO },
         headers: {
@@ -140,6 +112,8 @@ const Appointments: React.FC = () => {
     } catch (error) {
       console.error("Error fetching package data:", error);
       message.error("Error fetching data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -179,6 +153,11 @@ const Appointments: React.FC = () => {
     );
   };
 
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchPackageData();
+  };
+
   return (
     <div className="sm:grid-cols-2">
       <div className="flex flex-col gap-9">
@@ -190,6 +169,70 @@ const Appointments: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Date Range Filter */}
+      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-4">
+        <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
+          <h3 className="font-medium text-black dark:text-white">
+            Date Range Filter
+          </h3>
+        </div>
+        <div className="p-6.5">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
+            <div className="flex-1">
+              <label className="mb-2.5 block text-black dark:text-white">
+                From Date
+              </label>
+              <DatePicker
+                showTime={{ format: 'HH:mm' }}
+                format="YYYY-MM-DD HH:mm"
+                value={fromDate}
+                onChange={(date) => {
+                  if (date) {
+                    setFromDate(date);
+                  }
+                }}
+                className="w-full"
+                placeholder="Select from date"
+                size="large"
+              />
+            </div>
+            
+            <div className="flex-1">
+              <label className="mb-2.5 block text-black dark:text-white">
+                To Date
+              </label>
+              <DatePicker
+                showTime={{ format: 'HH:mm' }}
+                format="YYYY-MM-DD HH:mm"
+                value={toDate}
+                onChange={(date) => {
+                  if (date) {
+                    setToDate(date);
+                  }
+                }}
+                className="w-full"
+                placeholder="Select to date"
+                disabledDate={(current) => current && current < fromDate}
+                size="large"
+              />
+            </div>
+            
+            <div className="flex-1">
+              <Button 
+                type="primary" 
+                onClick={handleSearch}
+                loading={loading}
+                className="w-full h-10"
+                size="large"
+              >
+                Search Appointments
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">
@@ -201,9 +244,6 @@ const Appointments: React.FC = () => {
                 <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
                   Doctor's name
                 </th>
-                {/*<th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">*/}
-                {/*  First Name*/}
-                {/*</th>*/}
                 <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
                   Reason
                 </th>
@@ -228,11 +268,6 @@ const Appointments: React.FC = () => {
                       {appointment.doctorName}
                     </p>
                   </td>
-                  {/*<td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">*/}
-                  {/*  <p className="text-black dark:text-white">*/}
-                  {/*    {appointment.tokenNumber}*/}
-                  {/*  </p>*/}
-                  {/*</td>*/}
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">
                       {appointment.reason}
@@ -240,7 +275,7 @@ const Appointments: React.FC = () => {
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">
-                      {appointment.date}
+                      {formatDate(appointment.date)}
                     </p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -285,5 +320,5 @@ const Appointments: React.FC = () => {
     </div>
   );
 };
-//
+
 export default Appointments;
