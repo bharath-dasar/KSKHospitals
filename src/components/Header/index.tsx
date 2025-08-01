@@ -1,9 +1,57 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import DropdownMessage from './DropdownMessage';
 import DropdownNotification from './DropdownNotification';
 import DropdownUser from './DropdownUser';
 import LogoIcon from '../../images/logo/ksk.png';
 import DarkModeSwitcher from './DarkModeSwitcher';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const HospitalSelector = () => {
+  const [hospitals, setHospitals] = useState([]);
+  const [selected, setSelected] = useState<string>(() => sessionStorage.getItem('selectedHospital') || 'ALL');
+  const role = sessionStorage.getItem('role');
+  const location = useLocation();
+  const isHospitalsPage = location.pathname === '/hospitals';
+  const isAppointmentsPage = location.pathname === '/appointments';
+
+  useEffect(() => {
+    if (role === 'SUPERUSER') {
+      const token = sessionStorage.getItem('token');
+      axios.get('/hospital', {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(res => {
+        setHospitals(res.data);
+      });
+    }
+  }, [role]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelected(e.target.value);
+    sessionStorage.setItem('selectedHospital', e.target.value);
+    window.dispatchEvent(new Event('hospitalChanged'));
+  };
+
+  // Hide hospital selector on appointments page
+  if (role !== 'SUPERUSER' || isAppointmentsPage) return null;
+
+  return (
+    <div className="mr-4">
+      <select
+        value={selected}
+        onChange={handleChange}
+        className="rounded border border-stroke bg-white px-4 py-2 text-black dark:bg-boxdark dark:text-white shadow focus:border-primary focus:outline-none"
+      >
+        {isHospitalsPage && <option value="ALL">All Hospitals</option>}
+        {hospitals.map((h: any) => (
+          <option key={h.hospitalIdentifier} value={h.hospitalIdentifier}>
+            {h.hospitalName}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
@@ -60,6 +108,9 @@ const Header = (props: {
             <img src={LogoIcon} alt="Logo" />
           </Link>
         </div>
+        {/* HOSPITAL SELECTOR DROPDOWN */}
+        <HospitalSelector />
+        {/* HOSPITAL SELECTOR DROPDOWN */}
 
         <div className="hidden sm:block">
           <form action="https://formbold.com/s/unique_form_id" method="POST">

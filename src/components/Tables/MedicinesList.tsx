@@ -24,6 +24,7 @@ const MedicalList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const pageSize = 8;
+  const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
 
   const navigate = useNavigate();
 
@@ -67,7 +68,6 @@ const MedicalList = () => {
       setLoading(false);
     }
   };
-
   const paginatedData = medicalData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
