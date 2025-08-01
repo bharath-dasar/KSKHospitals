@@ -398,12 +398,12 @@ const CreateUser = () => {
                     onChange={handleChange}
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   >
-                    <option value="" disabled>
+                    <option value="" disabled className="text-body dark:text-bodydark">
                       Select your Role
                     </option>
-                    <option value="MEMBER">MEMBER</option>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="OWNER">OWNER</option>
+                    <option value="MEMBER" className="text-body dark:text-bodydark">MEMBER</option>
+                    <option value="ADMIN" className="text-body dark:text-bodydark">ADMIN</option>
+                    <option value="OWNER" className="text-body dark:text-bodydark">OWNER</option>
                   </select>
                 </div>
                 <div className="w-full xl:w-1/2">

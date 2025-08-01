@@ -156,7 +156,7 @@ const ClientList = () => {
                   Email
                 </th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">
-                  DOB
+                  Last Visited Time
                 </th>
                 <th className="font-medium text-black dark:text-white">
                   Actions
@@ -183,7 +183,9 @@ const ClientList = () => {
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <p className="text-black dark:text-white">
-                      {packageItem.dob}
+                      {packageItem.healthMetrics?.updatedDateTime 
+                        ? new Date(packageItem.healthMetrics.updatedDateTime).toLocaleDateString() 
+                        : 'Never'}
                     </p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -196,16 +198,14 @@ const ClientList = () => {
                           <AddIcon />
                         </button>
                       </Tooltip>
-                      {/* <Tooltip title="Edit Patient">
+                      <Tooltip title="Edit Patient">
                         <button 
                           className="hover:text-primary"
                           onClick={() => navigate(`/editPatient/${packageItem.patientIdentifier}`)}
                         >
                           <Edit />
                         </button>
-                      </Tooltip> */}
-                      {/* Delete Appointment Button */}
-                      {/* permission based button */}
+                      </Tooltip>
                       <Tooltip title="Delete Patient">
                         <button
                           className="hover:text-primary"

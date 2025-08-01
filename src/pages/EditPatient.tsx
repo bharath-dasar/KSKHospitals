@@ -1,7 +1,7 @@
 import { AutoComplete, message } from "antd";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import DOB from "../components/Forms/DatePicker/DOB";
+import CustomDOB from "../components/Forms/DatePicker/CustomDOB";
 import axios from "axios";
 
 // Types
@@ -48,7 +48,7 @@ interface Doctor {
 }
 
 const EditPatient = () => {
-  const { userIdentifier } = useParams();
+  const { userIdentifier: patientIdentifier } = useParams();
   const navigate = useNavigate();
 
   // State management
@@ -98,13 +98,13 @@ const EditPatient = () => {
 
   // Fetch patient data on component mount
   useEffect(() => {
-    if (userIdentifier) {
+    if (patientIdentifier) {
       fetchPatientData();
     } else {
-      message.error("User identifier is missing");
+      message.error("Patient identifier is missing");
     //   navigate("/clientList");
     }
-  }, [userIdentifier]);
+  }, [patientIdentifier]);
 
   // Fetch patient data
   const fetchPatientData = async () => {
@@ -112,7 +112,7 @@ const EditPatient = () => {
       setInitialLoading(true);
       const { token, hospitalIdentifier } = getAuthData();
       
-      const response = await axios.get(`/user/GetUserByIdentifier/${userIdentifier}`, {
+      const response = await axios.get(`/patient/${patientIdentifier}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           HospitalIdentifier: hospitalIdentifier,
@@ -128,7 +128,7 @@ const EditPatient = () => {
         email: patientData.email || "",
         age: patientData.age || "",
         dateOfBirth: patientData.dob || "",
-        address: "",
+        address: patientData.address?.addressLine1 || "",
         medicalHistory: "",
         time: "",
         doctorName: "",
@@ -320,14 +320,14 @@ const EditPatient = () => {
       const { token, hospitalIdentifier, userIdentifier } = getAuthData();
       
       const requestBody = {
-        identifier: userIdentifier,
-        status: "ACTIVE",
+        patientIdentifier: patientIdentifier,
         username: formData.fullName,
         dob: formData.dateOfBirth,
         age: calculateAge(formData.dateOfBirth).toString(),
         gender: selectedGender,
         phone: formData.phoneNumber,
         email: formData.email,
+        category: "",
         address: {
           addressLine1: formData.addressLine1,
           addressLine2: formData.addressLine2,
@@ -337,29 +337,31 @@ const EditPatient = () => {
           postalCode: formData.postalCode,
         },
         patientStatus: "ACTIVE",
+        active: true,
         hospitalIdentifier: hospitalIdentifier,
         healthMetrics: {
           createdBy: userIdentifier,
           createdDateTime: new Date().toISOString(),
           updatedBy: userIdentifier,
           updatedDateTime: new Date().toISOString(),
-          height: formData.height,
-          weight: formData.weight,
+          height: parseFloat(formData.height) || 0,
+          weight: parseFloat(formData.weight) || 0,
           bloodPressure: formData.bloodPressure,
-          pulse: formData.pulse,
-          randomBloodSugar: formData.randomBloodSugar,
-          bmi: formData.bmi,
-          bodyFat: formData.bodyFat,
-          visceralFat: formData.visceralFat,
-          skeletalMuscle: formData.skeletalMuscle,
-          boneMass: formData.boneMass,
-          bmr: formData.bmr,
-          bodyWater: formData.bodyWater,
-          bodyTemperature: formData.bodyTemperature,
+          pulse: parseFloat(formData.pulse) || 0,
+          randomBloodSugar: parseFloat(formData.randomBloodSugar) || 0,
+          bmi: parseFloat(formData.bmi) || 0,
+          bodyFat: parseFloat(formData.bodyFat) || 0,
+          visceralFat: parseFloat(formData.visceralFat) || 0,
+          skeletalMuscle: parseFloat(formData.skeletalMuscle) || 0,
+          boneMass: parseFloat(formData.boneMass) || 0,
+          bmr: parseFloat(formData.bmr) || 0,
+          bodyWater: parseFloat(formData.bodyWater) || 0,
+          bodyTemperature: parseFloat(formData.bodyTemperature) || 0,
         },
+        diseases: []
       };
 
-      const response = await axios.put(`/patient/${userIdentifier}`, requestBody, {
+      const response = await axios.put(`/patient`, requestBody, {
         headers: {
           Authorization: `Bearer ${token}`,
           HospitalIdentifier: hospitalIdentifier,
@@ -523,7 +525,12 @@ const EditPatient = () => {
                 {renderInputField('fullName', 'Full name', 'text', 'Enter your full name', true)}
                 {renderInputField('phoneNumber', 'Phone Number', 'text', 'Enter your Phone number', true)}
                 <div className="w-full xl:w-1/2">
-                  <DOB onDateChange={handleDateChange} />
+                  <CustomDOB 
+                    onDateChange={handleDateChange} 
+                    value={formData.dateOfBirth}
+                    label="Date of Birth"
+                    required={true}
+                  />
                   {validationErrors.dateOfBirth && (
                     <div className="text-red-500 text-sm mt-1">{validationErrors.dateOfBirth}</div>
                   )}
