@@ -36,6 +36,7 @@ import ApiTesting from "./pages/ApiTesting";
 import PixelMarker from "./pages/PixelMarker";
 import CreateBed from "./pages/CreateBed";
 import BedsList from "./components/Tables/BedsList";
+import Hospitals from "./pages/Hospitals";
 
 axios.defaults.baseURL = "https://kskhospital.prime5d.in/kskhospital/";
 
@@ -320,6 +321,19 @@ function App() {
               <PageTitle title="Signup " />
               <SignUp />
             </>
+          }
+        />
+        <Route
+          path="/hospitals"
+          element={
+            isLoggedIn ? (
+              <>
+                <PageTitle title="Hospitals" />
+                <Hospitals />
+              </>
+            ) : (
+              <Navigate to="/auth/signin" />
+            )
           }
         />
       </Routes>

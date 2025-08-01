@@ -1,56 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Doctor } from '../../types/doctor';
+import { Button } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
-interface Doctor {
-  identifier: string;
-  name: string;
-  email: string;
-  role: string;
-  phone: string;
-  address: {
-    addressLine1: string;
-    city: string;
-    state: string;
-    country: string;
-    postalCode: string;
-  };
-  designationDetails: string;
-  designation: {
-    identifier: string;
-    name: string;
-  };
-}
-
-const DoctorList = () => {
+const DoctorsList = () => {
   const [doctorData, setDoctorData] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [totalPages, setTotalPages] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
+  const pageSize = 7;
+  const navigate = useNavigate();
 
+  // Doctor designation identifier
+  const DOCTOR_DESIGNATION_ID = 'a45f6bce-72cc-4be4-b70f-519b89eec3df';
+
+  // Fetch doctors when hospital changes
   useEffect(() => {
     const fetchDoctorData = async () => {
       try {
-        setLoading(true);
         const token = sessionStorage.getItem("token");
-        if (!token) {
-          console.error("Token is missing in sessionStorage");
-          return;
+        const hospitalIdentifier = sessionStorage.getItem('HospitalIdentifier');
+        
+        let url = '';
+        if (selectedHospital === 'ALL') {
+          // If ALL hospitals selected, we need to fetch from all hospitals
+          // For now, we'll use the current user's hospital
+          url = `/user/getAll/hospital/${hospitalIdentifier}`;
+        } else {
+          url = `/user/getAll/hospital/${selectedHospital}`;
         }
-
-        const designationIdentifier = "a45f6bce-72cc-4be4-b70f-519b89eec3df";
-        const response = await axios.get(`/user/filterUserByDesignation/${designationIdentifier}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        
+        const response = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` }
         });
-
-        if (response.data && Array.isArray(response.data)) {
-          const data: Doctor[] = response.data;
-          setDoctorData(data);
-          setTotalPages(Math.ceil(data.length / pageSize));
-        }
+        
+        // Filter users to only show doctors (users with doctor designation)
+        const allUsers = response.data;
+        const doctors = allUsers.filter((user: any) => 
+          user.designation?.identifier === DOCTOR_DESIGNATION_ID
+        );
+        
+        setDoctorData(doctors);
+        setTotalPages(Math.ceil(doctors.length / pageSize));
       } catch (error) {
+        setDoctorData([]);
+        setTotalPages(1);
         console.error('Error fetching doctor data:', error);
         setDoctorData([]);
         setTotalPages(0);
@@ -60,6 +56,21 @@ const DoctorList = () => {
     };
     fetchDoctorData();
   }, [pageSize]);
+
+  useEffect(() => {
+    const handler = () => {
+      setSelectedHospital(sessionStorage.getItem('selectedHospital') || 'ALL');
+      setCurrentPage(1);
+    };
+    window.addEventListener('hospitalChanged', handler);
+    return () => window.removeEventListener('hospitalChanged', handler);
+  }, [selectedHospital]);
+
+  // Get paginated data
+  const paginatedData = doctorData.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -169,4 +180,4 @@ const DoctorList = () => {
   );
 };
 
-export default DoctorList;
+export default DoctorsList;

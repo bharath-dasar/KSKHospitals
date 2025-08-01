@@ -17,12 +17,44 @@ const ClientList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
+  const [usedPatientIdentifier, setUsedPatientIdentifier] =
+    useState<String>("");
+  const [usedDoctorIdentifier, setUsedDoctorIdentifier] = useState<String>("");
+
+  const navigate = useNavigate();
+
+  const [selectedDate, setSelectedDate] = useState<any>(null);
+  const [isoString, setIsoString] = useState("");
+
+  const handleDateChange = (value: any) => {
+    setSelectedDate(value);
+    console.log("_____AAAAADate", value.toDate().toISOString());
+    setFormData({ ...formData, date: value.toDate().toISOString() });
+  };
+
+  const handleConvert = () => {
+    if (selectedDate) {
+      // If selectedDate has a toDate method (e.g., dayjs), use it; otherwise, use new Date(selectedDate)
+      const date = typeof (selectedDate as any).toDate === 'function' ? (selectedDate as any).toDate() : new Date(String(selectedDate));
+      setIsoString(date.toISOString());
+    }
+  };
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    phoneNumber: "",
+    email: "",
+    dateOfBirth: "",
+    time: "",
+    date: "",
+    doctorName: "",
+    symptoms: "",
+    reason: "",
+  });
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<PackagePatient | null>(null);
-
-  const navigate = useNavigate();
 
   // Modal handlers
   const showModal = (patient: PackagePatient) => {
@@ -35,22 +67,20 @@ const ClientList = () => {
     setSelectedPatient(null);
   };
 
+  const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
+
   const fetchPackageData = async () => {
     try {
-      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
       const token = sessionStorage.getItem("token");
-      const response = await axios.get(
-        `/patient/getAll/${hospitalIdentifier}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            CurrentUserId: sessionStorage.getItem("useridentifier"),
-            HospitalIdentifier: hospitalIdentifier,
-          },
-        },
-      );
+      let url = '/patient';
+      let headers: any = {
+        Authorization: `Bearer ${token}`,
+      };
+      if (selectedHospital !== 'ALL') {
+        url = `/patient/getAll/${selectedHospital}`;
+      }
+      const response = await axios.get(url, { headers });
       const data: PackagePatient[] = response.data;
-      console.log(response.data);
       setPackageData(data);
       setTotalPages(Math.ceil(data.length / pageSize));
     } catch (error) {
@@ -61,7 +91,13 @@ const ClientList = () => {
 
   useEffect(() => {
     fetchPackageData();
-  }, []);
+    const handler = () => {
+      setSelectedHospital(sessionStorage.getItem('selectedHospital') || 'ALL');
+      setCurrentPage(1);
+    };
+    window.addEventListener('hospitalChanged', handler);
+    return () => window.removeEventListener('hospitalChanged', handler);
+  }, [selectedHospital]);
 
   const deletePatient = async (patientIdentifier: string) => {
     try {
