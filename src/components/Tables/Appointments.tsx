@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { message, Table } from "antd";
+import { message, Table, Tooltip, Modal } from "antd";
 import { useNavigate } from "react-router-dom"; // React Router v6
 import type { ColumnsType } from "antd/es/table";
 import axios from "axios";
@@ -8,6 +8,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 // Define the Appointment Interface
 interface Appointment {
+  appointmentIdentifier: string;
   tokenNumber: string;
   patientIdentifier: string;
   doctorIdentifier: string;
@@ -81,44 +82,73 @@ const Appointments: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchPackageData = async () => {
-      try {
-        const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
-        const token = sessionStorage.getItem("token");
-
-        // Get current date
-        const today = new Date();
-
-        // Set fromDate to one day before today
-        const fromDate = new Date(today);
-        fromDate.setDate(today.getDate() - 1); // Subtract 1 day
-        const fromDateISO = fromDate.toISOString();
-
-        // Set toDate to one day after today
-        const toDate = new Date(today);
-        toDate.setDate(today.getDate() + 1); // Add 1 day
-        const toDateISO = toDate.toISOString();
-
-        const response = await axios.get<Appointment[]>(`/appointment/getAll`, {
-          params: { from: fromDateISO, to: toDateISO },
-          headers: {
-            Authorization: `Bearer ${token}`,
-            CurrentUserId: sessionStorage.getItem("useridentifier"),
-            HospitalIdentifier: hospitalIdentifier,
-          },
-        });
-        console.log("__AAAresponse", response.data);
-        const data: Appointment[] = response.data;
-        setAppointments(data); // Assuming you have a state like `const [appointments, setAppointments] = useState<Appointment[]>([])`
-        setTotalPages(Math.ceil(data.length / pageSize));
-      } catch (error) {
-        console.error("Error fetching package data:", error);
-        message.error("Error fetching data");
-      }
-    };
-
     fetchPackageData();
   }, []);
+
+  const fetchPackageData = async () => {
+    try {
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+
+      // Get current date
+      const today = new Date();
+
+      // Set fromDate to one day before today
+      const fromDate = new Date(today);
+      fromDate.setDate(today.getDate() - 1); // Subtract 1 day
+      const fromDateISO = fromDate.toISOString();
+
+      // Set toDate to one day after today
+      const toDate = new Date(today);
+      toDate.setDate(today.getDate() + 1); // Add 1 day
+      const toDateISO = toDate.toISOString();
+
+      const response = await axios.get<Appointment[]>(`/appointment/getAll`, {
+        params: { from: fromDateISO, to: toDateISO },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          CurrentUserId: sessionStorage.getItem("useridentifier"),
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+      const data: Appointment[] = response.data;
+      setAppointments(data); // Assuming you have a state like `const [appointments, setAppointments] = useState<Appointment[]>([])`
+      setTotalPages(Math.ceil(data.length / pageSize));
+    } catch (error) {
+      console.error("Error fetching package data:", error);
+      message.error("Error fetching data");
+    }
+  };
+
+  const deleteAppointment = async (appointmentIdentifier: string) => {
+    try {
+      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
+      const token = sessionStorage.getItem("token");
+      await axios.delete(`/appointment/${appointmentIdentifier}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+      message.success("Appointment deleted successfully");
+      fetchPackageData();
+    } catch (error) {
+      message.error("Error deleting appointment");
+    }
+  };
+
+  const handleDeleteClick = (appointment: Appointment) => {
+    Modal.confirm({
+      title: "Delete Appointment",
+      content: `Are you sure you want to delete the appointment for ${appointment.patientName} with Dr. ${appointment.doctorName}?`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk() {
+        deleteAppointment(appointment.appointmentIdentifier);
+      },
+    });
+  };
 
   const handleRowClick = (record: Appointment) => {
     navigate(
@@ -191,13 +221,15 @@ const Appointments: React.FC = () => {
                     </p>
                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <div className="flex items-center space-x-3.5">
-                      <button className="hover:text-primary">
-                        <RemoveRedEyeIcon />
-                      </button>
-                      <button className="hover:text-primary">
-                        <DeleteIcon />
-                      </button>
+                    <div className="flex items-center">
+                      <Tooltip title="Delete Appointment">
+                        <button
+                          className="hover:text-primary"
+                          onClick={() => handleDeleteClick(appointment)}
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>

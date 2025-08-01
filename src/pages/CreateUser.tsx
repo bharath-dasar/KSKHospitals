@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { message } from "antd";
@@ -24,20 +24,65 @@ const CreateUser = () => {
     retypePassword: "",
     phone: "",
   });
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<{identifier: string, name: string} | null>(null);
   const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false);
+  const [designations, setDesignations] = useState<Array<{identifier: string, name: string}>>([]);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
 
   const changeTextColor = () => {
     setIsOptionSelected(true);
   };
   const navigate = useNavigate();
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const validateField = (name: string, value: string) => {
+    const errors: {[key: string]: string} = {};
+    
+    switch (name) {
+      case 'phoneNumber':
+        if (value && !/^\d{10}$/.test(value)) {
+          errors.phoneNumber = 'Phone number must be exactly 10 digits';
+        }
+        else{
+          errors.phoneNumber = "";
+        }
+        break;
+      case 'email':
+        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors.email = 'Please enter a valid email address';
+        }
+        else{
+          errors.email = "";
+        }
+        break;
+      case 'name':
+        if (value && !value.trim()) {
+          errors.name = 'Name is required';
+        }
+        else{
+          errors.name = "";
+        }
+        break;
+      case 'designation':
+        if (value && !value.trim()) {
+          errors.designation = 'Designation is required';
+        }
+        else{
+          errors.designation = "";
+        }
+        break;
+    }
+    
+    setValidationErrors(prev => ({ ...prev, ...errors }));
   };
 
-  const calculateAge = (dob: string): number => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    validateField(name, value);
+  };
+
+  const calculateAge = (dob: string) => {
     const birthDate = new Date(dob);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -48,18 +93,49 @@ const CreateUser = () => {
     ) {
       age--;
     }
-    return age;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      age: age.toString(),
+      dob: dob,
+    }));
   };
 
   const handleDateChange = (date: string) => {
-    setFormData({ ...formData, dob: date });
-    setFormData({ ...formData, age: calculateAge(date).toString() });
+    calculateAge(date);
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevents the browser from appending form values to URL
+    
+    // Validation checks
     if (formData.password !== formData.retypePassword) {
       message.error("Both the passwords don't match");
+      return;
+    }
+
+    // Phone number validation - must be exactly 10 digits
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phoneNumber)) {
+      message.error("Phone number must be exactly 10 digits");
+      return;
+    }
+
+    // Email validation - must contain @ and have proper format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      message.error("Please enter a valid email address");
+      return;
+    }
+
+    // Name validation - must not be empty
+    if (!formData.name.trim()) {
+      message.error("Name is required");
+      return;
+    }
+
+    // Role validation - must be selected
+    if (!selectedOption) {
+      message.error("Please select a role");
       return;
     }
     const token = sessionStorage.getItem("token");
@@ -74,9 +150,10 @@ const CreateUser = () => {
       age: formData.age,
       name: formData.name,
       email: formData.email,
-      role: selectedOption,
+      designation: selectedOption,
       password: formData.password, //tbd
       phone: formData.phoneNumber,
+      role: formData.role,
       address: {
         addressLine1: formData.addressLine1,
         addressLine2: formData.addressLine2,
@@ -86,7 +163,6 @@ const CreateUser = () => {
         postalCode: formData.postalCode,
       },
       hospitalIdentifier: sessionStorage.getItem("HospitalIdentifier"),
-      designation: formData.designation,
     };
     try {
       const response = await axios.post("/user", requestBody, {
@@ -105,13 +181,42 @@ const CreateUser = () => {
     }
   };
 
+  const handleGetAllDesignations = async () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      console.error("Token is missing in sessionStorage");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/user/getAllDesignations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        // message.success("All designations retrieved successfully");
+        console.log(response.data);
+        setDesignations(response.data);
+      }
+    } catch (error) {
+      message.error("Error getting all designations contact admin");
+      console.error(error);
+    }
+  };
+
+  // useEffect to call handleGetAllDesignations on component mount
+  useEffect(() => {
+    handleGetAllDesignations();
+  }, []);
+
   return (
     <div className="sm:grid-cols-2">
       <div className="flex flex-col gap-9">
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
             <h3 className="font-medium text-black dark:text-white">
-              Patient Form
+              User Form
             </h3>
           </div>
           <form onSubmit={handleCreateUser}>
@@ -127,8 +232,15 @@ const CreateUser = () => {
                     placeholder="Enter your full name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className={`w-full rounded border-[1.5px] py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:bg-form-input dark:text-white dark:focus:border-primary ${
+                      validationErrors.name 
+                        ? 'border-red-500 dark:border-red-500' 
+                        : 'border-stroke dark:border-form-strokedark'
+                    } bg-transparent`}
                   />
+                  {validationErrors.name && (
+                    <div className="text-red-500 text-sm mt-1">{validationErrors.name}</div>
+                  )}
                 </div>
                 <div className="w-full xl:w-1/2">
                   <label className="mb-2.5 block text-black dark:text-white">
@@ -140,8 +252,15 @@ const CreateUser = () => {
                     placeholder="Enter your Phone number"
                     value={formData.phoneNumber}
                     onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className={`w-full rounded border-[1.5px] py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:bg-form-input dark:text-white dark:focus:border-primary ${
+                      validationErrors.phoneNumber 
+                        ? 'border-red-500 dark:border-red-500' 
+                        : 'border-stroke dark:border-form-strokedark'
+                    } bg-transparent`}
                   />
+                  {validationErrors.phoneNumber && (
+                    <div className="text-red-500 text-sm mt-1">{validationErrors.phoneNumber}</div>
+                  )}
                 </div>
                 <div className="w-full xl:w-1/2">
                   <DOB onDateChange={handleDateChange} />
@@ -159,8 +278,15 @@ const CreateUser = () => {
                     placeholder="Enter your email address"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className={`w-full rounded border-[1.5px] py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:bg-form-input dark:text-white dark:focus:border-primary ${
+                      validationErrors.email 
+                        ? 'border-red-500 dark:border-red-500' 
+                        : 'border-stroke dark:border-form-strokedark'
+                    } bg-transparent`}
                   />
+                  {validationErrors.email && (
+                    <div className="text-red-500 text-sm mt-1">{validationErrors.email}</div>
+                  )}
                 </div>
                 <div className="mb-3 w-full xl:w-1/2">
                   <label className="mb-2.5 block text-black dark:text-white">
@@ -233,29 +359,35 @@ const CreateUser = () => {
               <div className="flex flex-col gap-6 xl:flex-row">
                 <div className="w-full xl:w-1/2">
                   <label className="mb-2.5 block text-black dark:text-white">
-                    Designation
+                    Role
                   </label>
-                  <input
-                    type="text"
-                    name="designation"
-                    placeholder="Enter your Designation"
-                    value={formData.designation}
+                  <select
+                    name="role"
+                    value={formData.role}
                     onChange={handleChange}
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
+                  >
+                    <option value="" disabled>
+                      Select your Role
+                    </option>
+                    <option value="MEMBER">MEMBER</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="OWNER">OWNER</option>
+                  </select>
                 </div>
                 <div className="w-full xl:w-1/2">
                   <div className="mb-4.5">
                     <label className="mb-2.5 block text-black dark:text-white">
                       {" "}
-                      Role{" "}
+                      Designation{" "}
                     </label>
 
                     <div className="relative z-20 bg-transparent dark:bg-form-input">
                       <select
-                        value={selectedOption}
+                        value={selectedOption?.identifier || ""}
                         onChange={(e) => {
-                          setSelectedOption(e.target.value);
+                          const selectedDesignation = designations.find(d => d.identifier === e.target.value);
+                          setSelectedOption(selectedDesignation || null);
                           changeTextColor();
                         }}
                         className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
@@ -267,26 +399,17 @@ const CreateUser = () => {
                           disabled
                           className="text-body dark:text-bodydark"
                         >
-                          Select your Role
+                          Select your Designation
                         </option>
-                        <option
-                          value="ADMIN"
-                          className="text-body dark:text-bodydark"
-                        >
-                          ADMIN
-                        </option>
-                        <option
-                          value="MEMBER"
-                          className="text-body dark:text-bodydark"
-                        >
-                          MEMBER
-                        </option>
-                        <option
-                          value="OWNER"
-                          className="text-body dark:text-bodydark"
-                        >
-                          OWNER
-                        </option>
+                        {designations.map((designation) => (
+                          <option
+                            key={designation.identifier}
+                            value={designation.identifier}
+                            className="text-body dark:text-bodydark"
+                          >
+                            {designation.name}
+                          </option>
+                        ))}
                       </select>
 
                       <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">

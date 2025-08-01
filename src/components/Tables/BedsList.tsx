@@ -5,21 +5,20 @@ import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Edit } from '@mui/icons-material';
 
-interface MedicalItem {
-  identifier: string;
-  name: string;
-  hsn: number;
+interface BedItem {
+  hospitalBedIdentifier: string;
+  roomNumber: string;
+  bedType: string;
+  status: string;
+  active: boolean;
+  price: number;
+  taxPercentage: number;
   description: string;
-  gst: number;
-  category: string;
-  unit: string;
-  stock_qty: number;
-  mrp: number;
-  selling_price: number;
+  hospitalIdentifier: string;
 }
 
-const MedicalList = () => {
-  const [medicalData, setMedicalData] = useState<MedicalItem[]>([]);
+const BedsList = () => {
+  const [bedsData, setBedsData] = useState<BedItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -28,10 +27,10 @@ const MedicalList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchMedicalData();
+    fetchBedsData();
   }, []);
 
-  const fetchMedicalData = async () => {
+  const fetchBedsData = async () => {
     try {
       setLoading(true);
       const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
@@ -42,7 +41,7 @@ const MedicalList = () => {
         return;
       }
 
-      const response = await axios.get('/product/getAll', {
+      const response = await axios.get(`/hospital/bed/getAll/${hospitalIdentifier}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           CurrentUserId: sessionStorage.getItem("useridentifier"),
@@ -51,24 +50,24 @@ const MedicalList = () => {
       });
 
       if (response.data && Array.isArray(response.data)) {
-        const data: MedicalItem[] = response.data;
-        setMedicalData(data);
+        const data: BedItem[] = response.data;
+        setBedsData(data);
         setTotalPages(Math.ceil(data.length / pageSize));
       } else {
-        setMedicalData([]);
+        setBedsData([]);
         setTotalPages(0);
       }
     } catch (error) {
-      console.error('Error fetching medical data:', error);
-      message.error("Error fetching medical data");
-      setMedicalData([]);
+      console.error('Error fetching beds data:', error);
+      message.error("Error fetching beds data");
+      setBedsData([]);
       setTotalPages(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const paginatedData = medicalData.slice(
+  const paginatedData = bedsData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
@@ -77,14 +76,44 @@ const MedicalList = () => {
     setCurrentPage(page);
   };
 
-  const redirectToAddMedicine = () => {
-    navigate('/addMedicine');
+  const redirectToAddBed = () => {
+    navigate('/createBed');
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'text-green-600 bg-green-100';
+      case 'OCCUPIED':
+        return 'text-red-600 bg-red-100';
+      case 'MAINTENANCE':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'RESERVED':
+        return 'text-blue-600 bg-blue-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'Available';
+      case 'OCCUPIED':
+        return 'Occupied';
+      case 'MAINTENANCE':
+        return 'Maintenance';
+      case 'RESERVED':
+        return 'Reserved';
+      default:
+        return status;
+    }
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg">Loading medicines...</div>
+        <div className="text-lg">Loading beds...</div>
       </div>
     );
   }
@@ -94,10 +123,10 @@ const MedicalList = () => {
       <div className="flex justify-end py-4">
         <Button
           type="primary"
-          onClick={redirectToAddMedicine}
+          onClick={redirectToAddBed}
           className="inline-flex items-center justify-center bg-primary py-2 px-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-4"
         >
-          Add Medicine
+          Add Bed
         </Button>
       </div>
 
@@ -106,57 +135,59 @@ const MedicalList = () => {
           <table className="w-full table-auto">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Name</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Room Number</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Bed Type</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Status</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Active</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Price (₹)</th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">Tax (%)</th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">Description</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Category</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">HSN</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">GST (%)</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Unit</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Stock Qty</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">MRP</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Selling Price</th>
                 <th className="font-medium text-black dark:text-white">Actions</th>
               </tr>
             </thead>
             <tbody>
               {paginatedData.length > 0 ? (
-                paginatedData.map((medicalItem, key) => (
+                paginatedData.map((bedItem, key) => (
                   <tr key={key}>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="font-medium text-black dark:text-white">{medicalItem.name}</p>
+                      <p className="font-medium text-black dark:text-white">{bedItem.roomNumber}</p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">{medicalItem.description}</p>
+                      <p className="text-black dark:text-white">{bedItem.bedType}</p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">{medicalItem.category}</p>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(bedItem.status)}`}>
+                        {getStatusText(bedItem.status)}
+                      </span>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">{medicalItem.hsn}</p>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        bedItem.active 
+                          ? 'text-green-600 bg-green-100' 
+                          : 'text-red-600 bg-red-100'
+                      }`}>
+                        {bedItem.active ? 'Active' : 'Inactive'}
+                      </span>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">{medicalItem.gst}%</p>
+                      <p className="text-black dark:text-white">₹{bedItem.price}</p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">{medicalItem.unit}</p>
+                      <p className="text-black dark:text-white">{bedItem.taxPercentage}%</p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">{medicalItem.stock_qty}</p>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">₹{medicalItem.mrp}</p>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">₹{medicalItem.selling_price}</p>
+                      <p className="text-black dark:text-white max-w-xs truncate" title={bedItem.description}>
+                        {bedItem.description}
+                      </p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <div className="flex items-center space-x-3.5">
-                        <Tooltip title="Edit Medicine">
+                        <Tooltip title="Edit Bed">
                           <button className="hover:text-primary">
                             <Edit />
                           </button>
                         </Tooltip>
-                        <Tooltip title="Delete Medicine">
+                        <Tooltip title="Delete Bed">
                           <button className="hover:text-primary">
                             <DeleteIcon />
                           </button>
@@ -167,8 +198,8 @@ const MedicalList = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className="text-center py-8 text-gray-500">
-                    No medicines found
+                  <td colSpan={8} className="text-center py-8 text-gray-500">
+                    No beds found
                   </td>
                 </tr>
               )}
@@ -201,4 +232,4 @@ const MedicalList = () => {
   );
 };
 
-export default MedicalList;
+export default BedsList; 

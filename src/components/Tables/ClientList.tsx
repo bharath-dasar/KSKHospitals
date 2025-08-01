@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import {
-  DatePicker,
-  AutoComplete,
   Button,
   message,
-  Modal,
   Tooltip,
 } from "antd";
 import axios from "axios";
@@ -13,107 +10,29 @@ import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Edit } from "@mui/icons-material";
-import Date from "../Forms/DatePicker/Date";
-
-const doctors = [
-  { label: "Dr. John Smith", value: "Dr. John Smith" },
-  { label: "Dr. Emily White", value: "Dr. Emily White" },
-  { label: "Dr. Michael Brown", value: "Dr. Michael Brown" },
-];
+import AppointmentModal from "../AppointmentModal";
 
 const ClientList = () => {
   const [packageData, setPackageData] = useState<PackagePatient[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredDoctors, setFilteredDoctors] = useState(doctors);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
-  const [usedPatientIdentifier, setUsedPatientIdentifier] =
-    useState<String>("");
-  const [usedDoctorIdentifier, setUsedDoctorIdentifier] = useState<String>("");
-
-  const navigate = useNavigate();
-
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [isoString, setIsoString] = useState("");
-
-  const handleDateChange = (value) => {
-    setSelectedDate(value);
-    setFormData({ ...formData, date: value });
-  };
-
-  const handleConvert = () => {
-    if (selectedDate) {
-      const date = new Date(selectedDate);
-      setIsoString(date.toISOString());
-    }
-  };
-
-  const [formData, setFormData] = useState({
-    fullName: "",
-    phoneNumber: "",
-    email: "",
-    dateOfBirth: "",
-    time: "",
-    date: "",
-    doctorName: "",
-    symptoms: "",
-  });
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<PackagePatient | null>(null);
+
+  const navigate = useNavigate();
+
   // Modal handlers
-  const showModal = () => {
+  const showModal = (patient: PackagePatient) => {
+    setSelectedPatient(patient);
     setIsModalOpen(true);
   };
 
-  // Testing purpose
-  const handleOk = async () => {
-    console.log("Form Data:", formData);
-    try {
-      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
-      const token = sessionStorage.getItem("token");
-
-      const fromDate = new Date(); // Example: Set the start date dynamically
-      const toDate = new Date(); // Example: Set the end date dynamically
-      const requestBody = {
-        appointmentIdentifier: "",
-        hospitalIdentifier: hospitalIdentifier,
-        patientIdentifier: usedPatientIdentifier,
-        doctorIdentifier: usedDoctorIdentifier,
-        dateTime: "2025-03-30T17:57:46.999Z",
-        reason: "Mild Concussions",
-        status: "OPEN",
-      };
-
-      await axios.post(`/appointment`, requestBody, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          CurrentUserId: sessionStorage.getItem("useridentifier"),
-          HospitalIdentifier: hospitalIdentifier,
-        },
-      });
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error fetching package data:", error);
-      message.error("Error fetching data");
-    }
-  };
-  const handleDoctorSearch = (value: string) => {
-    setFilteredDoctors(
-      doctors.filter((doctor) =>
-        doctor.value.toLowerCase().includes(value.toLowerCase()),
-      ),
-    );
-    setFormData({ ...formData, doctorName: value });
-  };
-  const handleCancel = () => {
+  const handleCloseModal = () => {
     setIsModalOpen(false);
-  };
-  // Input change handler
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setSelectedPatient(null);
   };
 
   const fetchPackageData = async () => {
@@ -131,6 +50,7 @@ const ClientList = () => {
         },
       );
       const data: PackagePatient[] = response.data;
+      console.log(response.data);
       setPackageData(data);
       setTotalPages(Math.ceil(data.length / pageSize));
     } catch (error) {
@@ -159,6 +79,7 @@ const ClientList = () => {
       message.error("Error fetching data");
     }
   };
+
   const paginatedData = packageData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
@@ -234,26 +155,27 @@ const ClientList = () => {
                       <Tooltip title="Add Appointment">
                         <button
                           className="hover:text-primary"
-                          onClick={() => {
-                            setUsedPatientIdentifier(packageItem.identifier);
-                            showModal();
-                          }}
+                          onClick={() => showModal(packageItem)}
                         >
                           <AddIcon />
                         </button>
                       </Tooltip>
-                      <Tooltip title="Edit Patient">
-                        <button className="hover:text-primary">
+                      {/* <Tooltip title="Edit Patient">
+                        <button 
+                          className="hover:text-primary"
+                          onClick={() => navigate(`/editPatient/${packageItem.patientIdentifier}`)}
+                        >
                           <Edit />
                         </button>
-                      </Tooltip>
-
+                      </Tooltip> */}
                       {/* Delete Appointment Button */}
                       {/* permission based button */}
                       <Tooltip title="Delete Patient">
                         <button
                           className="hover:text-primary"
-                          onClick={() => deletePatient(packageItem.identifier)}
+                          onClick={() =>
+                            deletePatient(packageItem.patientIdentifier)
+                          }
                         >
                           <DeleteIcon />
                         </button>
@@ -287,77 +209,16 @@ const ClientList = () => {
           </div>
         </div>
       </div>
-      {/* Modal */}
-      <Modal
-        title="Create Appointment"
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <div>
-          <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-            <div>
-              <DatePicker
-                showTime
-                onChange={handleDateChange}
-                format="YYYY-MM-DD HH:mm:ss"
-              />
-              <Button
-                onClick={handleConvert}
-                type="primary"
-                style={{ marginLeft: 8 }}
-              >
-                Convert to ISO
-              </Button>
-              {isoString && (
-                <p style={{ marginTop: 10 }}>
-                  <strong>ISO String:</strong> {isoString}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="mb-4.5 flex flex-col xl:flex-row">
-            <div className="w-full xl:w-full">
-              <label className=" block text-black dark:text-white">
-                Doctor's Name
-              </label>
-              <AutoComplete
-                className="w-full  border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                options={filteredDoctors}
-                style={{ width: "100%", height: "85%" }}
-                onSearch={handleDoctorSearch}
-                onSelect={(value) =>
-                  setFormData({ ...formData, doctorName: value })
-                }
-                placeholder="Select doctor's name"
-                value={formData.doctorName}
-              />
-            </div>
-          </div>
-          <div className="mb-6">
-            <label className="mb-2.5 block text-black dark:text-white">
-              Symptoms
-            </label>
-            <textarea
-              name="symptoms"
-              rows={4}
-              placeholder="Describe symptoms"
-              value={formData.symptoms}
-              onChange={handleChange}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-            ></textarea>
-          </div>
-          <div className="mb-6">
-            <button
-              type="button"
-              // onClick={handleCreateAppointment}
-              className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-            >
-              Schedule Appointment
-            </button>
-          </div>
-        </div>
-      </Modal>
+
+      {/* Appointment Modal */}
+      {selectedPatient && (
+        <AppointmentModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          patientIdentifier={selectedPatient.patientIdentifier}
+          patientName={selectedPatient.username}
+        />
+      )}
     </div>
   );
 };
