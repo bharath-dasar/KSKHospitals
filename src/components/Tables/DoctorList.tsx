@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Doctor } from '../../types/doctor';
 import { Button } from 'antd';
@@ -49,9 +47,14 @@ const DoctorsList = () => {
         setDoctorData([]);
         setTotalPages(1);
         console.error('Error fetching doctor data:', error);
+        setDoctorData([]);
+        setTotalPages(0);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDoctorData();
+  }, [pageSize]);
     const handler = () => {
       setSelectedHospital(sessionStorage.getItem('selectedHospital') || 'ALL');
       setCurrentPage(1);
@@ -70,90 +73,108 @@ const DoctorsList = () => {
     setCurrentPage(page);
   };
 
-  const redirectToCreatePatient = () => {
-    navigate('/doctorForm');
-  };
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentDoctors = doctorData.slice(startIndex, endIndex);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Loading doctors...</div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="flex justify-between items-center py-4">
-        <Button
-          type="primary"
-          onClick={redirectToCreatePatient}
-          className="inline-flex items-center justify-center bg-primary py-2 px-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-4"
-        >
-          Create Doctor
-        </Button>
-        {/* Designation dropdown removed as per user request */}
-      </div>
-      <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        <div className="max-w-full overflow-x-auto">
-          <table className="w-full table-auto">
-            <thead>
-              <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Name</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Email</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Phone</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">City</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Designation</th>
-                <th className="py-4 px-4 font-medium text-black dark:text-white">Actions</th>
+    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <div className="max-w-full overflow-x-auto">
+        <table className="w-full table-auto">
+          <thead>
+            <tr className="bg-gray-2 text-left dark:bg-meta-4">
+              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+                Doctor Name
+              </th>
+              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
+                Email
+              </th>
+              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                Phone
+              </th>
+              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                Role
+              </th>
+              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                Designation
+              </th>
+              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                City
+              </th>
+              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                State
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentDoctors.map((doctor, index) => (
+              <tr key={doctor.identifier}>
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                  <h5 className="font-medium text-black dark:text-white">
+                    Dr. {doctor.name}
+                  </h5>
+                  <p className="text-sm">{doctor.designationDetails || 'No details'}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">{doctor.email}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">{doctor.phone}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">{doctor.role}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">{doctor.designation?.name || 'N/A'}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">{doctor.address?.city || 'N/A'}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">{doctor.address?.state || 'N/A'}</p>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {paginatedData.map((doctor, key) => (
-                <tr key={key}>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="font-medium text-black dark:text-white">{doctor.name}</p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">{doctor.email}</p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">{doctor.phone}</p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">{doctor.address?.city}</p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">{doctor.designation?.name}</p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <div className="flex items-center space-x-3.5">
-                      <button className="hover:text-primary">
-                        <RemoveRedEyeIcon />
-                      </button>
-                      <button className="hover:text-primary">
-                        <DeleteIcon />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="flex justify-between mt-4">
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-4">
+          <div className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, doctorData.length)} of {doctorData.length} doctors
+          </div>
+          <div className="flex space-x-2">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`py-2 px-4 ${currentPage === 1 ? 'opacity-50' : ''}`}
+              className="px-3 py-1 border rounded disabled:opacity-50"
             >
               Previous
             </button>
-            <span>
+            <span className="px-3 py-1">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`py-2 px-4 ${currentPage === totalPages ? 'opacity-50' : ''}`}
+              className="px-3 py-1 border rounded disabled:opacity-50"
             >
               Next
             </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default DoctorsList;
+export default DoctorList;

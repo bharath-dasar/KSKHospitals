@@ -1,6 +1,6 @@
 import { AutoComplete, message } from "antd";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import DOB from "../components/Forms/DatePicker/DOB";
 import axios from "axios";
 
@@ -47,7 +47,10 @@ interface Doctor {
   value: string;
 }
 
-const PatientForm = () => {
+const EditPatient = () => {
+  const { userIdentifier } = useParams();
+  const navigate = useNavigate();
+
   // State management
   const [formData, setFormData] = useState<PatientFormData>({
     fullName: "",
@@ -88,10 +91,86 @@ const PatientForm = () => {
   const [showDetailsFields, setShowDetailsFields] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
-  const navigate = useNavigate();
+
+  // Fetch patient data on component mount
+  useEffect(() => {
+    if (userIdentifier) {
+      fetchPatientData();
+    } else {
+      message.error("User identifier is missing");
+    //   navigate("/clientList");
+    }
+  }, [userIdentifier]);
+
+  // Fetch patient data
+  const fetchPatientData = async () => {
+    try {
+      setInitialLoading(true);
+      const { token, hospitalIdentifier } = getAuthData();
+      
+      const response = await axios.get(`/user/GetUserByIdentifier/${userIdentifier}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          HospitalIdentifier: hospitalIdentifier,
+        },
+      });
+
+      const patientData = response.data;
+      
+      // Populate form with patient data
+      setFormData({
+        fullName: patientData.username || "",
+        phoneNumber: patientData.phone || "",
+        email: patientData.email || "",
+        age: patientData.age || "",
+        dateOfBirth: patientData.dob || "",
+        address: "",
+        medicalHistory: "",
+        time: "",
+        doctorName: "",
+        symptoms: "",
+        height: patientData.healthMetrics?.height || "",
+        weight: patientData.healthMetrics?.weight || "",
+        bloodPressure: patientData.healthMetrics?.bloodPressure || "",
+        pulse: patientData.healthMetrics?.pulse || "",
+        randomBloodSugar: patientData.healthMetrics?.randomBloodSugar || "",
+        bmi: patientData.healthMetrics?.bmi || "",
+        bodyFat: patientData.healthMetrics?.bodyFat || "",
+        visceralFat: patientData.healthMetrics?.visceralFat || "",
+        skeletalMuscle: patientData.healthMetrics?.skeletalMuscle || "",
+        boneMass: patientData.healthMetrics?.boneMass || "",
+        bmr: patientData.healthMetrics?.bmr || "",
+        bodyWater: patientData.healthMetrics?.bodyWater || "",
+        bodyTemperature: patientData.healthMetrics?.bodyTemperature || "",
+        gender: "",
+        addressLine1: patientData.address?.addressLine1 || "",
+        addressLine2: patientData.address?.addressLine2 || "",
+        city: patientData.address?.city || "",
+        state: patientData.address?.state || "",
+        country: patientData.address?.country || "",
+        postalCode: patientData.address?.postalCode || "",
+      });
+
+      setSelectedGender(patientData.gender || "");
+      setIsGenderSelected(!!patientData.gender);
+
+      // Show details fields if health metrics exist
+      if (patientData.healthMetrics) {
+        setShowDetailsFields(true);
+      }
+
+    } catch (error: any) {
+      console.error("Error fetching patient data:", error);
+      message.error("Failed to fetch patient data");
+    //   navigate("/clientList");
+    } finally {
+      setInitialLoading(false);
+    }
+  };
 
   // Fetch doctors from API
   const fetchDoctors = async () => {
@@ -112,7 +191,6 @@ const PatientForm = () => {
         
         setDoctors(doctorsList);
         setFilteredDoctors(doctorsList);
-        console.log("Doctors fetched successfully:", response);
       }
     } catch (error: any) {
       console.error("Error fetching doctors:", error);
@@ -236,15 +314,12 @@ const PatientForm = () => {
     }
   };
 
-
-
   // API functions
-  const createPatient = async (): Promise<void> => {
+  const updatePatient = async (): Promise<void> => {
     try {
       const { token, hospitalIdentifier, userIdentifier } = getAuthData();
       
       const requestBody = {
-        patientId: 0,
         identifier: userIdentifier,
         status: "ACTIVE",
         username: formData.fullName,
@@ -284,17 +359,17 @@ const PatientForm = () => {
         },
       };
 
-      const response = await axios.post("/patient", requestBody, {
+      const response = await axios.put(`/patient/${userIdentifier}`, requestBody, {
         headers: {
           Authorization: `Bearer ${token}`,
           HospitalIdentifier: hospitalIdentifier,
         },
       });
 
-      message.success("Patient created successfully");
+      message.success("Patient updated successfully");
       navigate("/clientList");
     } catch (error: any) {
-      console.error("Error creating patient:", error);
+      console.error("Error updating patient:", error);
       
       if (error.response?.status === 400) {
         const errorData = error.response.data;
@@ -312,46 +387,8 @@ const PatientForm = () => {
     }
   };
 
-  const createAppointment = async (): Promise<void> => {
-    try {
-      const { token, hospitalIdentifier, userIdentifier } = getAuthData();
-
-      // Validate appointment fields
-      if (!formData.doctorName || !formData.time || !formData.symptoms) {
-        message.error("Please fill in all required appointment fields");
-        return;
-      }
-
-      const requestBody = {
-        appointmentIdentifier: crypto.randomUUID(),
-        hospitalIdentifier: hospitalIdentifier,
-        patientIdentifier: userIdentifier,
-        doctorIdentifier: formData.doctorName,
-        dateTime: formData.time,
-        reason: formData.symptoms,
-        status: "OPEN",
-      };
-
-      const response = await axios.post("/appointment", requestBody, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          CurrentUserId: userIdentifier,
-          HospitalIdentifier: hospitalIdentifier,
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        message.success("Appointment created successfully");
-        resetForm();
-      }
-    } catch (error: any) {
-      console.error("Error creating appointment:", error);
-      message.error("Failed to create appointment. Please try again.");
-    }
-  };
-
   // Form submission
-  const handleCreatePatient = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdatePatient = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     // Validation checks
@@ -399,37 +436,7 @@ const PatientForm = () => {
 
     setLoading(true);
     try {
-      await createPatient();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateAppointment = async () => {
-    // Appointment validation
-    if (!formData.doctorName) {
-      message.error("Please select a doctor");
-      return;
-    }
-
-    if (!formData.time) {
-      message.error("Please select appointment time");
-      return;
-    }
-
-    if (!formData.symptoms.trim()) {
-      message.error("Please describe the symptoms");
-      return;
-    }
-
-    if (formData.symptoms.trim().length < 10) {
-      message.error("Symptoms description must be at least 10 characters");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await createAppointment();
+      await updatePatient();
     } finally {
       setLoading(false);
     }
@@ -440,45 +447,6 @@ const PatientForm = () => {
   const handleCloseAppointment = () => setShowAppointmentFields(false);
   const handleAddMoreDetails = () => setShowDetailsFields(true);
   const handleHideMoreDetails = () => setShowDetailsFields(false);
-
-  // Reset form
-  const resetForm = () => {
-    setFormData({
-      fullName: "",
-      phoneNumber: "",
-      email: "",
-      age: "",
-      dateOfBirth: "",
-      address: "",
-      medicalHistory: "",
-      time: "",
-      doctorName: "",
-      symptoms: "",
-      height: "",
-      weight: "",
-      bloodPressure: "",
-      pulse: "",
-      randomBloodSugar: "",
-      bmi: "",
-      bodyFat: "",
-      visceralFat: "",
-      skeletalMuscle: "",
-      boneMass: "",
-      bmr: "",
-      bodyWater: "",
-      bodyTemperature: "",
-      gender: "",
-      addressLine1: "",
-      addressLine2: "",
-      city: "",
-      state: "",
-      country: "",
-      postalCode: "",
-    });
-    setSelectedGender("");
-    setIsGenderSelected(false);
-    setValidationErrors({});
-  };
 
   // Render helper functions
   const renderInputField = (
@@ -531,16 +499,24 @@ const PatientForm = () => {
     </div>
   );
 
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Loading patient data...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="sm:grid-cols-2">
       <div className="flex flex-col gap-9">
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
             <h3 className="font-medium text-black dark:text-white">
-              Patient Form
+              Edit Patient
             </h3>
           </div>
-          <form onSubmit={handleCreatePatient}>
+          <form onSubmit={handleUpdatePatient}>
             <div className="p-6.5">
               {/* Basic Information */}
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
@@ -644,7 +620,6 @@ const PatientForm = () => {
                 </div>
               )}
 
-
               {/* Action Buttons */}
               <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                 {showDetailsFields && (
@@ -662,7 +637,7 @@ const PatientForm = () => {
                   disabled={loading}
                   className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90 disabled:opacity-50"
                 >
-                  {loading ? 'Creating Patient...' : 'Create Patient'}
+                  {loading ? 'Updating Patient...' : 'Update Patient'}
                 </button>
               </div>
             </div>
@@ -673,4 +648,4 @@ const PatientForm = () => {
   );
 };
 
-export default PatientForm;
+export default EditPatient; 

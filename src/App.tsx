@@ -14,6 +14,8 @@ import Profile from "./pages/Profile";
 // import Settings from './pages/Settings';
 // import CreateUser from './pages/CreatePatient';
 import PatientForm from "./pages/PatientForm";
+import EditPatient from "./pages/EditPatient";
+import AddMedicine from "./pages/AddMedicine";
 import ReportForm from "./pages/ReportForm";
 import CreateUser from "./pages/CreateUser";
 import Tables from "./pages/Tables";
@@ -31,6 +33,9 @@ import Appointments from "./components/Tables/Appointments";
 import axios from "axios";
 import ReportGenerate from "./pages/ReportGenerate";
 import ApiTesting from "./pages/ApiTesting";
+import PixelMarker from "./pages/PixelMarker";
+import CreateBed from "./pages/CreateBed";
+import BedsList from "./components/Tables/BedsList";
 import Hospitals from "./pages/Hospitals";
 
 axios.defaults.baseURL = "https://kskhospital.prime5d.in/kskhospital/";
@@ -166,6 +171,24 @@ function App() {
           }
         />
         <Route
+          path="/editPatient/:userIdentifier"
+          element={
+            <>
+              <PageTitle title="Edit Patient" />
+              <EditPatient />
+            </>
+          }
+        />
+        <Route
+          path="/addMedicine"
+          element={
+            <>
+              <PageTitle title="Add Medicine" />
+              <AddMedicine />
+            </>
+          }
+        />
+        <Route
           path="/reportForm"
           element={
             <>
@@ -225,6 +248,33 @@ function App() {
             <>
               <PageTitle title="API Testing" />
               <ApiTesting />
+            </>
+          }
+        />
+        <Route
+          path="/pixelMarker"
+          element={
+            <>
+              <PageTitle title="Image Pixel Marker" />
+              <PixelMarker />
+            </>
+          }
+        />
+        <Route
+          path="/createBed"
+          element={
+            <>
+              <PageTitle title="Create Bed" />
+              <CreateBed />
+            </>
+          }
+        />
+        <Route
+          path="/bedsList"
+          element={
+            <>
+              <PageTitle title="Beds List" />
+              <BedsList />
             </>
           }
         />

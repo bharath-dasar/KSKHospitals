@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import {
-  DatePicker,
-  AutoComplete,
   Button,
   message,
-  Modal,
   Tooltip,
 } from "antd";
 import axios from "axios";
@@ -13,19 +10,11 @@ import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Edit } from "@mui/icons-material";
-import Date from "../Forms/DatePicker/Date";
-import date from "../Forms/DatePicker/Date";
-
-const doctors = [
-  { label: "Dr. John Smith", value: "Dr. John Smith" },
-  { label: "Dr. Emily White", value: "Dr. Emily White" },
-  { label: "Dr. Michael Brown", value: "Dr. Michael Brown" },
-];
+import AppointmentModal from "../AppointmentModal";
 
 const ClientList = () => {
   const [packageData, setPackageData] = useState<PackagePatient[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredDoctors, setFilteredDoctors] = useState(doctors);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
   const [usedPatientIdentifier, setUsedPatientIdentifier] =
@@ -65,124 +54,19 @@ const ClientList = () => {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<PackagePatient | null>(null);
+
+  const navigate = useNavigate();
+
   // Modal handlers
-  const showModal = () => {
+  const showModal = (patient: PackagePatient) => {
+    setSelectedPatient(patient);
     setIsModalOpen(true);
   };
 
-  // Testing purpose
-  const handleOk = async () => {
-    try {
-      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
-      const token = sessionStorage.getItem("token");
-      const currentUserId = sessionStorage.getItem("userIdentifier");
-
-      if (!hospitalIdentifier || !token || !currentUserId) {
-        message.error("Authentication information is missing");
-        return;
-      }
-
-      if (!usedPatientIdentifier || !usedDoctorIdentifier) {
-        message.error("Patient and Doctor information is required");
-        return;
-      }
-
-      const requestBody = {
-        appointmentIdentifier: crypto.randomUUID(),
-        hospitalIdentifier: hospitalIdentifier,
-        patientIdentifier: usedPatientIdentifier,
-        doctorIdentifier: usedDoctorIdentifier,
-        dateTime: formData.date,
-        reason: formData.reason || "General Checkup",
-        status: "OPEN",
-      };
-
-      const response = await axios.post(`/appointment`, requestBody, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          CurrentUserId: currentUserId,
-          HospitalIdentifier: hospitalIdentifier,
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        message.success("Appointment created successfully");
-        setIsModalOpen(false);
-        // Optionally refresh the list or update UI
-      }
-    } catch (error) {
-      console.error("Error creating appointment:", error);
-      message.error("Failed to create appointment. Please try again.");
-    }
-  };
-
-  const testHandleOk = async () => {
-    try {
-      const hospitalIdentifier = sessionStorage.getItem("HospitalIdentifier");
-      const token = sessionStorage.getItem("token");
-      const currentUserId = sessionStorage.getItem("userIdentifier");
-
-      if (!hospitalIdentifier || !token || !currentUserId) {
-        message.error("Authentication information is missing");
-        console.error(
-          "Error creating appointment:",
-          hospitalIdentifier,
-          token,
-          currentUserId,
-        );
-        return;
-      }
-
-      // Predefined test values
-      const testRequestBody = {
-        appointmentIdentifier: crypto.randomUUID(),
-        hospitalIdentifier: hospitalIdentifier,
-        patientIdentifier: usedPatientIdentifier, // Test patient ID
-        doctorIdentifier: "e71d286f-5d8b-4ea0-b84d-d8ea5c6cac3c", // Test doctor ID
-        dateTime: formData.date, // Future test date
-        reason: formData.symptoms || "General Checkup",
-        status: "OPEN",
-      };
-
-      console.log("Test Request Body:", testRequestBody);
-
-      const response = await axios.post(`/appointment`, testRequestBody, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          CurrentUserId: currentUserId,
-          HospitalIdentifier: hospitalIdentifier,
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        message.success("Test appointment created successfully");
-        console.log("Test Response:", response.data);
-        setIsModalOpen(false);
-      }
-    } catch (error) {
-      console.error("Error creating test appointment:", error);
-      message.error(
-        "Failed to create test appointment. Please check console for details.",
-      );
-    }
-  };
-
-  const handleDoctorSearch = (value: string) => {
-    setFilteredDoctors(
-      doctors.filter((doctor) =>
-        doctor.value.toLowerCase().includes(value.toLowerCase()),
-      ),
-    );
-    setFormData({ ...formData, doctorName: value });
-  };
-  const handleCancel = () => {
+  const handleCloseModal = () => {
     setIsModalOpen(false);
-  };
-  // Input change handler
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setSelectedPatient(null);
   };
 
   const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
@@ -233,6 +117,7 @@ const ClientList = () => {
       message.error("Error fetching data");
     }
   };
+
   const paginatedData = packageData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
@@ -308,22 +193,19 @@ const ClientList = () => {
                       <Tooltip title="Add Appointment">
                         <button
                           className="hover:text-primary"
-                          onClick={() => {
-                            setUsedPatientIdentifier(
-                              packageItem.patientIdentifier,
-                            );
-                            showModal();
-                          }}
+                          onClick={() => showModal(packageItem)}
                         >
                           <AddIcon />
                         </button>
                       </Tooltip>
-                      <Tooltip title="Edit Patient">
-                        <button className="hover:text-primary">
+                      {/* <Tooltip title="Edit Patient">
+                        <button 
+                          className="hover:text-primary"
+                          onClick={() => navigate(`/editPatient/${packageItem.patientIdentifier}`)}
+                        >
                           <Edit />
                         </button>
-                      </Tooltip>
-
+                      </Tooltip> */}
                       {/* Delete Appointment Button */}
                       {/* permission based button */}
                       <Tooltip title="Delete Patient">
@@ -365,70 +247,16 @@ const ClientList = () => {
           </div>
         </div>
       </div>
-      {/* Modal */}
-      <Modal
-        title="Create Appointment"
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <div>
-          <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-            <div>
-              <DatePicker
-                showTime
-                onChange={handleDateChange}
-                format="YYYY-MM-DD HH:mm:ss"
-              />
-              {isoString && (
-                <p style={{ marginTop: 10 }}>
-                  <strong>ISO String:</strong> {isoString}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="mb-4.5 flex flex-col xl:flex-row">
-            <div className="w-full xl:w-full">
-              <label className=" block text-black dark:text-white">
-                Doctor's Name
-              </label>
-              <AutoComplete
-                className="w-full  border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                options={filteredDoctors}
-                style={{ width: "100%", height: "85%" }}
-                onSearch={handleDoctorSearch}
-                onSelect={(value) =>
-                  setFormData({ ...formData, doctorName: value })
-                }
-                placeholder="Select doctor's name"
-                value={formData.doctorName}
-              />
-            </div>
-          </div>
-          <div className="mb-6">
-            <label className="mb-2.5 block text-black dark:text-white">
-              Symptoms
-            </label>
-            <textarea
-              name="symptoms"
-              rows={4}
-              placeholder="Describe symptoms"
-              value={formData.symptoms}
-              onChange={handleChange}
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-            ></textarea>
-          </div>
-          <div className="mb-6">
-            <button
-              type="button"
-              onClick={testHandleOk}
-              className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-            >
-              Schedule Appointment
-            </button>
-          </div>
-        </div>
-      </Modal>
+
+      {/* Appointment Modal */}
+      {selectedPatient && (
+        <AppointmentModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          patientIdentifier={selectedPatient.patientIdentifier}
+          patientName={selectedPatient.username}
+        />
+      )}
     </div>
   );
 };
