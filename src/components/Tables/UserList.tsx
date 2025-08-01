@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Package } from "../../types/package";
 import { Edit } from "@mui/icons-material";
@@ -121,6 +121,9 @@ const UserList = () => {
                   Role
                 </th>
                 <th className="py-4 px-4 font-medium text-black dark:text-white">
+                  Designation
+                </th>
+                <th className="py-4 px-4 font-medium text-black dark:text-white">
                   Actions
                 </th>
               </tr>
@@ -150,23 +153,35 @@ const UserList = () => {
                       </p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                      <p className="text-black dark:text-white">
+                        {packageItem.designation?.name || 'N/A'}
+                      </p>
+                    </td>
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <div className="flex items-center space-x-3.5">
-                        {/* <button className="hover:text-primary">
-                          <Edit />
-                        </button> */}
-                        <button
-                          className="hover:text-primary"
-                          onClick={() => userdelete(packageItem.identifier)}
-                        >
-                          <DeleteIcon />
-                        </button>
+                        <Tooltip title="Edit User">
+                          <button 
+                            className="hover:text-primary"
+                            onClick={() => navigate(`/editUser/${packageItem.identifier}`)}
+                          >
+                            <Edit />
+                          </button>
+                        </Tooltip>
+                        <Tooltip title="Deactivate User">
+                          <button
+                            className="hover:text-primary"
+                            onClick={() => userdelete(packageItem.identifier)}
+                          >
+                            <DeleteIcon />
+                          </button>
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="text-center py-4">
+                  <td colSpan={6} className="text-center py-4">
                     No users available
                   </td>
                 </tr>

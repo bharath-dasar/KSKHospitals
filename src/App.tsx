@@ -37,6 +37,9 @@ import PixelMarker from "./pages/PixelMarker";
 import CreateBed from "./pages/CreateBed";
 import BedsList from "./components/Tables/BedsList";
 import Hospitals from "./pages/Hospitals";
+import CreateHospital from "./pages/CreateHospital";
+import EditUser from "./pages/EditUser";
+import EditMedicine from "./pages/EditMedicine";
 
 axios.defaults.baseURL = "https://kskhospital.prime5d.in/kskhospital/";
 
@@ -330,6 +333,45 @@ function App() {
               <>
                 <PageTitle title="Hospitals" />
                 <Hospitals />
+              </>
+            ) : (
+              <Navigate to="/auth/signin" />
+            )
+          }
+        />
+        <Route
+          path="/createHospital"
+          element={
+            isLoggedIn ? (
+              <>
+                <PageTitle title="Create Hospital" />
+                <CreateHospital />
+              </>
+            ) : (
+              <Navigate to="/auth/signin" />
+            )
+          }
+        />
+        <Route
+          path="/editUser/:userIdentifier"
+          element={
+            isLoggedIn ? (
+              <>
+                <PageTitle title="Edit User" />
+                <EditUser />
+              </>
+            ) : (
+              <Navigate to="/auth/signin" />
+            )
+          }
+        />
+        <Route
+          path="/editMedicine/:productIdentifier"
+          element={
+            isLoggedIn ? (
+              <>
+                <PageTitle title="Edit Medicine" />
+                <EditMedicine />
               </>
             ) : (
               <Navigate to="/auth/signin" />
