@@ -41,8 +41,8 @@ const Appointments: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedHospital, setSelectedHospital] = useState(() => sessionStorage.getItem('selectedHospital') || 'ALL');
   const [loading, setLoading] = useState(false);
-  const [fromDate, setFromDate] = useState<Dayjs>(dayjs('2025-08-01').startOf('day'));
-  const [toDate, setToDate] = useState<Dayjs>(dayjs('2025-08-31').endOf('day'));
+  const [fromDate, setFromDate] = useState<Dayjs>(dayjs('2025-08-01T00:00:00'));
+  const [toDate, setToDate] = useState<Dayjs>(dayjs('2025-08-31T23:59:59'));
 
   const navigate = useNavigate();
 
@@ -71,9 +71,16 @@ const Appointments: React.FC = () => {
       setLoading(true);
       const token = sessionStorage.getItem("token");
       
-      // Use date range for API call
-      const fromDateISO = fromDate.toISOString();
-      const toDateISO = toDate.toISOString();
+      // Use local date format to avoid timezone conversion issues
+      const fromDateISO = fromDate.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      const toDateISO = toDate.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      
+      console.log('Date range being sent:', {
+        from: fromDateISO,
+        to: toDateISO,
+        fromDate: fromDate.format('YYYY-MM-DD HH:mm'),
+        toDate: toDate.format('YYYY-MM-DD HH:mm')
+      });
       
       // Fetch appointments with date range
       const response = await axios.get('/appointment/getAll', {
