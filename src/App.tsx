@@ -258,7 +258,7 @@ function App() {
           path="/pixelMarker"
           element={
             <>
-              <PageTitle title="Image Pixel Marker" />
+              <PageTitle title="Image Picker" />
               <PixelMarker />
             </>
           }

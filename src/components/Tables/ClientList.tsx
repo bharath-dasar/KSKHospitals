@@ -28,7 +28,6 @@ const ClientList = () => {
 
   const handleDateChange = (value: any) => {
     setSelectedDate(value);
-    console.log("_____AAAAADate", value.toDate().toISOString());
     setFormData({ ...formData, date: value.toDate().toISOString() });
   };
 
@@ -72,13 +71,10 @@ const ClientList = () => {
   const fetchPackageData = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      let url = '/patient';
       let headers: any = {
         Authorization: `Bearer ${token}`,
       };
-      if (selectedHospital !== 'ALL') {
-        url = `/patient/getAll/${selectedHospital}`;
-      }
+      let url = `/patient/getAll/${selectedHospital}`;
       const response = await axios.get(url, { headers });
       const data: PackagePatient[] = response.data;
       setPackageData(data);
