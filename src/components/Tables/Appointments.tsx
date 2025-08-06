@@ -264,7 +264,11 @@ const Appointments: React.FC = () => {
             </thead>
             <tbody>
               {paginatedData.map((appointment, key) => (
-                <tr key={key}>
+                <tr 
+                  key={key}
+                  onClick={() => handleRowClick(appointment)}
+                  className="cursor-pointer hover:bg-gray-50 dark:hover:bg-meta-4 transition-colors"
+                >
                   <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                     <h5 className="font-medium text-black dark:text-white">
                       {appointment.patientName}
@@ -290,7 +294,10 @@ const Appointments: React.FC = () => {
                       <Tooltip title="Delete Appointment">
                         <button
                           className="hover:text-primary"
-                          onClick={() => handleDeleteClick(appointment)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(appointment);
+                          }}
                         >
                           <DeleteIcon />
                         </button>

@@ -10,6 +10,7 @@ import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 import VaccinesOutlinedIcon from '@mui/icons-material/VaccinesOutlined';
 import ImageIcon from '@mui/icons-material/Image';
 import HotelIcon from '@mui/icons-material/Hotel';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -199,7 +200,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   }`}
                 >
                 <ImageIcon/>
-                Image Marker
+                Image Picker
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/reportForm"
+                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                    (pathname === '/reportForm' ||
+                      pathname.includes('reportForm')) &&
+                    'bg-graydark dark:bg-meta-4'
+                  }`}
+                >
+                <DescriptionOutlinedIcon/>
+                Reports
                 </NavLink>
               </li>
               <li>
