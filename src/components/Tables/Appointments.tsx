@@ -10,14 +10,47 @@ import dayjs, { Dayjs } from "dayjs";
 // Define the Appointment Interface
 interface Appointment {
   appointmentIdentifier: string;
-  tokenNumber: string;
   patientIdentifier: string;
   doctorIdentifier: string;
-  patientName: string;
-  doctorName: string;
+  patient: {
+    patientIdentifier: string;
+    username: string;
+    dob: string;
+    age: string;
+    gender: string;
+    phone: string;
+    email: string;
+    address: {
+      addressLine1: string;
+      addressLine2: string;
+      city: string;
+      state: string;
+      country: string;
+      postalCode: string;
+    };
+    patientStatus: string;
+    active: boolean;
+  };
+  doctor: {
+    identifier: string;
+    dob: string;
+    name: string;
+    email: string;
+    role: string;
+    phone: string;
+    address: {
+      addressLine1: string;
+      city: string;
+      state: string;
+      country: string;
+      postalCode: string;
+    };
+    designationDetails: string;
+    active: boolean;
+  };
+  dateTime: string; // Keep as string since it's in ISO format
   reason: string;
   status: string;
-  date: string; // Keep as string since it's in ISO format
 }
 
 const formatDate = (isoString: string): string => {
@@ -71,20 +104,20 @@ const Appointments: React.FC = () => {
       setLoading(true);
       const token = sessionStorage.getItem("token");
       
-      // Use local date format to avoid timezone conversion issues
-      const fromDateISO = fromDate.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-      const toDateISO = toDate.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      // Format dates as yyyy-MM-dd to match backend LocalDate expectation
+      const fromDateStr = fromDate.format('YYYY-MM-DD');
+      const toDateStr = toDate.format('YYYY-MM-DD');
       
       console.log('Date range being sent:', {
-        from: fromDateISO,
-        to: toDateISO,
-        fromDate: fromDate.format('YYYY-MM-DD HH:mm'),
-        toDate: toDate.format('YYYY-MM-DD HH:mm')
+        from: fromDateStr,
+        to: toDateStr,
+        fromDate: fromDate.format('YYYY-MM-DD'),
+        toDate: toDate.format('YYYY-MM-DD')
       });
       
       // Fetch appointments with date range
       const response = await axios.get('/appointment/getAll', {
-        params: { from: fromDateISO, to: toDateISO },
+        params: { from: fromDateStr, to: toDateStr },
         headers: {
           Authorization: `Bearer ${token}`,
           CurrentUserId: sessionStorage.getItem("useridentifier"),
@@ -144,7 +177,7 @@ const Appointments: React.FC = () => {
   const handleDeleteClick = (appointment: Appointment) => {
     Modal.confirm({
       title: "Delete Appointment",
-      content: `Are you sure you want to delete the appointment for ${appointment.patientName} with Dr. ${appointment.doctorName}?`,
+      content: `Are you sure you want to delete the appointment for ${appointment.patient.username} with Dr. ${appointment.doctor.name}?`,
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
@@ -156,7 +189,7 @@ const Appointments: React.FC = () => {
 
   const handleRowClick = (record: Appointment) => {
     navigate(
-      `/reportForm?user=${record.patientIdentifier}&${record.tokenNumber}`,
+      `/reportForm?user=${record.patientIdentifier}&token=${record.appointmentIdentifier}`,
     );
   };
 
@@ -269,26 +302,26 @@ const Appointments: React.FC = () => {
                   onClick={() => handleRowClick(appointment)}
                   className="cursor-pointer hover:bg-gray-50 dark:hover:bg-meta-4 transition-colors"
                 >
-                  <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                    <h5 className="font-medium text-black dark:text-white">
-                      {appointment.patientName}
-                    </h5>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">
-                      {appointment.doctorName}
-                    </p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">
-                      {appointment.reason}
-                    </p>
-                  </td>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">
-                      {formatDate(appointment.date)}
-                    </p>
-                  </td>
+                                     <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                     <h5 className="font-medium text-black dark:text-white">
+                       {appointment.patient.username}
+                     </h5>
+                   </td>
+                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                     <p className="text-black dark:text-white">
+                       {appointment.doctor.name}
+                     </p>
+                   </td>
+                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                     <p className="text-black dark:text-white">
+                       {appointment.reason}
+                     </p>
+                   </td>
+                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                     <p className="text-black dark:text-white">
+                       {formatDate(appointment.dateTime)}
+                     </p>
+                   </td>
                   <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                     <div className="flex items-center">
                       <Tooltip title="Delete Appointment">
