@@ -152,7 +152,10 @@ const MedicalList = () => {
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <div className="flex items-center space-x-3.5">
                         <Tooltip title="Edit Medicine">
-                          <button className="hover:text-primary">
+                          <button 
+                            className="hover:text-primary"
+                            onClick={() => navigate(`/editMedicine/${medicalItem.identifier}`)}
+                          >
                             <Edit />
                           </button>
                         </Tooltip>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { message } from "antd";
+import { message, Button } from "antd";
+import { useNavigate } from "react-router-dom";
 
 interface Hospital {
   hospitalName: string;
@@ -22,6 +23,8 @@ const Hospitals = () => {
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
   const [selectedHospital, setSelectedHospital] = useState<string>(() => sessionStorage.getItem('selectedHospital') || 'ALL');
+  const navigate = useNavigate();
+  const userRole = sessionStorage.getItem('role');
 
   const fetchHospitalData = async () => {
     try {
@@ -76,12 +79,29 @@ const Hospitals = () => {
     setCurrentPage(page);
   };
 
+  const redirectToCreateHospital = () => {
+    navigate("/createHospital");
+  };
+
   return (
     <div>
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Hospitals</h1>
         <p className="text-gray-600 mt-2">Manage and view all hospitals in the system</p>
-      </div>
+      </div> */}
+      
+      {/* Create Hospital Button for Superusers */}
+      {userRole === 'SUPERUSER' && (
+        <div className="flex justify-end py-4">
+          <Button
+            type="primary"
+            onClick={redirectToCreateHospital}
+            className="inline-flex items-center justify-center bg-primary py-2 px-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-4"
+          >
+            Create Hospital
+          </Button>
+        </div>
+      )}
       <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <div className="max-w-full overflow-x-auto">
           <table className="w-full table-auto">

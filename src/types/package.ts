@@ -4,6 +4,10 @@ export type Package = {
   phone: string; // Ensure to add this if needed
   email: string;
   role: string;
+  designation?: {
+    identifier: string;
+    name: string;
+  };
 };
 export type PackagePatient = {
   patientIdentifier: string;
@@ -12,4 +16,9 @@ export type PackagePatient = {
   phone: string; // Ensure to add this if needed
   email: string; // Ensure to add this if needed
   dob: string; // Ensure to add this if needed
+  lastVisitedTime?: string; // Last visited time for the patient
+  healthMetrics?: {
+    updatedDateTime?: string;
+    [key: string]: any;
+  };
 };
