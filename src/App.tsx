@@ -16,7 +16,6 @@ import Profile from "./pages/Profile";
 import PatientForm from "./pages/PatientForm";
 import EditPatient from "./pages/EditPatient";
 import AddMedicine from "./pages/AddMedicine";
-import ReportForm from "./pages/ReportForm";
 import CreateUser from "./pages/CreateUser";
 import Tables from "./pages/Tables";
 import Alerts from "./pages/UiElements/Alerts";
@@ -40,6 +39,8 @@ import Hospitals from "./pages/Hospitals";
 import CreateHospital from "./pages/CreateHospital";
 import EditUser from "./pages/EditUser";
 import EditMedicine from "./pages/EditMedicine";
+import AdmissionsIPD from "./pages/AdmissionsIPD";
+import ReportForm from "./pages/ReportForm";
 
 axios.defaults.baseURL = "https://kskhospital.prime5d.in/kskhospital/";
 
@@ -196,7 +197,7 @@ function App() {
           element={
             <>
               <PageTitle title="reportForm " />
-              <ReportGenerate />
+              <ReportForm />
             </>
           }
         />
@@ -372,6 +373,19 @@ function App() {
               <>
                 <PageTitle title="Edit Medicine" />
                 <EditMedicine />
+              </>
+            ) : (
+              <Navigate to="/auth/signin" />
+            )
+          }
+        />
+        <Route
+          path="/admissionsIPD"
+          element={
+            isLoggedIn ? (
+              <>
+                <PageTitle title="IPD Admissions" />
+                <AdmissionsIPD />
               </>
             ) : (
               <Navigate to="/auth/signin" />
