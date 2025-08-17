@@ -1,235 +1,409 @@
-import React, { useState } from 'react';
-import { Select, Table, Input } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Input, message, Button } from 'antd';
+import { useSearchParams } from 'react-router-dom';
+import { FileTextOutlined, PrinterOutlined } from '@ant-design/icons';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import axios from 'axios';
 
-const { Option } = Select;
+interface BillingData {
+  doctorFee: number;
+  additionalMedicinesFee: number;
+  discount: number;
+  totalAmount: number;
+}
 
-const ReportPage = () => {
-  const navigate = useNavigate();
-  const [selectedMedicines, setSelectedMedicines] = useState<{ medicine: string; tablets: string; usageInstructions: string }[]>([]);
-  const [selectedDiseases, setSelectedDiseases] = useState<string[]>([]);
-  const [reportData, setReportData] = useState({
-    patientName: '',
-    doctorName: '',
-    diagnosis: '',
+interface ValidationErrors {
+  [key: string]: string;
+}
+
+const ReportForm = () => {
+  const [searchParams] = useSearchParams();
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  
+  const [billingData, setBillingData] = useState<BillingData>({
+    doctorFee: 0,
+    additionalMedicinesFee: 0,
+    discount: 0,
+    totalAmount: 0,
   });
+  
+  const [patientInfo, setPatientInfo] = useState<any>(null);
+  const [appointmentInfo, setAppointmentInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [showInvoice, setShowInvoice] = useState(false);
+  
+  // Get patient and appointment identifiers from URL
+  const patientIdentifier = searchParams.get('user') || '';
+  const appointmentIdentifier = searchParams.get('token') || '';
+  
+  // Invoice data
+  const invoiceNumber = `INV-${Date.now()}`;
+  const invoiceDate = new Date().toLocaleDateString('en-GB');
 
-  const availableMedicines = [
-    'Paracetamol',
-    'Ibuprofen',
-    'Amoxicillin',
-    'Ciprofloxacin',
-    'Metformin',
-    'Omeprazole',
-    'Aspirin',
-    'Losartan',
-    'Atorvastatin',
-  ];
+  // Fetch patient and appointment information
+  useEffect(() => {
+    if (patientIdentifier) {
+      fetchPatientInfo();
+    }
+    if (appointmentIdentifier) {
+      fetchAppointmentInfo();
+    }
+  }, [patientIdentifier, appointmentIdentifier]);
 
-  const availableDiseases = [
-    'Diabetes',
-    'Hypertension',
-    'Asthma',
-    'Cancer',
-    'COVID-19',
-    'Pneumonia',
-    'Tuberculosis',
-    'Chronic Kidney Disease',
-    'Heart Disease',
-  ];
+  // Calculate total amount whenever billing data changes
+  useEffect(() => {
+    const total = billingData.doctorFee + billingData.additionalMedicinesFee - billingData.discount;
+    setBillingData(prev => ({ ...prev, totalAmount: Math.max(0, total) }));
+  }, [billingData.doctorFee, billingData.additionalMedicinesFee, billingData.discount]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setReportData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleMedicineSelect = (value: string[]) => {
-    const updatedMedicines = value.map((medicine) => {
-      const existing = selectedMedicines.find((med) => med.medicine === medicine);
-      return existing || { medicine, tablets: '', usageInstructions: '' };
-    });
-    setSelectedMedicines(updatedMedicines);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const payload = {
-      ...reportData,
-      prescribedMedicines: selectedMedicines,
-      diagnosedDiseases: selectedDiseases,
-    };
-
+  const fetchPatientInfo = async () => {
     try {
-      await axios.post('/api/reports', payload);
-      navigate('/appointments');
+      const token = sessionStorage.getItem("token");
+      const response = await axios.get(`/patient/${patientIdentifier}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPatientInfo(response.data);
     } catch (error) {
-      console.error('Error submitting report:', error);
-      alert('Failed to submit the report. Please try again.');
+      console.error("Error fetching patient info:", error);
+      message.error("Failed to fetch patient information");
     }
   };
+
+  const fetchAppointmentInfo = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const response = await axios.get(`/appointment/${appointmentIdentifier}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAppointmentInfo(response.data);
+    } catch (error) {
+      console.error("Error fetching appointment info:", error);
+    }
+  };
+
+  const handleBillingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const numericValue = parseFloat(value) || 0;
+    setBillingData(prev => ({ ...prev, [name]: numericValue }));
+    
+    // Clear validation error when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors: ValidationErrors = {};
+    
+    if (billingData.doctorFee <= 0) {
+      errors.doctorFee = 'Doctor fee is required and must be greater than 0';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const generateBill = () => {
+    if (!validateForm()) {
+      message.error('Please fill in all required fields');
+      return;
+    }
+    
+    setShowInvoice(true);
+    message.success('Invoice generated successfully!');
+  };
+
+  const downloadPDF = async () => {
+    if (!invoiceRef.current) return;
+    
+    try {
+      setLoading(true);
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      pdf.save(`Invoice-${invoiceNumber}.pdf`);
+      message.success('PDF downloaded successfully!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      message.error('Failed to generate PDF');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderBillingField = (
+    name: keyof BillingData,
+    label: string,
+    placeholder: string = "0.00",
+    required: boolean = false
+  ) => (
+    <div className="w-full xl:w-1/2">
+      <label className="mb-2.5 block text-black dark:text-white">
+        {label} {required && <span className="text-meta-1">*</span>}
+      </label>
+      <Input
+        type="number"
+        name={name}
+        placeholder={placeholder}
+        value={billingData[name] || ''}
+        onChange={handleBillingChange}
+        prefix="₹"
+        size="large"
+        min={0}
+        step={0.01}
+        className={validationErrors[name] ? 'border-red-500' : ''}
+      />
+      {validationErrors[name] && (
+        <div className="text-red-500 text-sm mt-1">{validationErrors[name]}</div>
+      )}
+    </div>
+  );
 
   return (
     <div className="sm:grid-cols-2">
       <div className="flex flex-col gap-9">
+        {/* Patient & Appointment Information Header */}
+        {(patientInfo || appointmentInfo) && (
+          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
+              <h3 className="font-medium text-black dark:text-white">
+                Patient & Appointment Information
+              </h3>
+            </div>
+            <div className="p-6.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {patientInfo && (
+                  <>
+                    <div>
+                      <span className="font-medium text-black dark:text-white">Patient: </span>
+                      <span className="text-black dark:text-white">{patientInfo.username}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-black dark:text-white">Age: </span>
+                      <span className="text-black dark:text-white">{patientInfo.age}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-black dark:text-white">Gender: </span>
+                      <span className="text-black dark:text-white">{patientInfo.gender}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-black dark:text-white">Phone: </span>
+                      <span className="text-black dark:text-white">{patientInfo.phone}</span>
+                    </div>
+                  </>
+                )}
+                {appointmentInfo && (
+                  <>
+                    <div>
+                      <span className="font-medium text-black dark:text-white">Doctor: </span>
+                      <span className="text-black dark:text-white">{appointmentInfo.doctor?.name}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-black dark:text-white">Date: </span>
+                      <span className="text-black dark:text-white">
+                        {new Date(appointmentInfo.dateTime).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-black dark:text-white">Time: </span>
+                      <span className="text-black dark:text-white">
+                        {new Date(appointmentInfo.dateTime).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-black dark:text-white">Reason: </span>
+                      <span className="text-black dark:text-white">{appointmentInfo.reason}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Billing Form */}
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
           <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-            <h3 className="font-medium text-black dark:text-white">Report Page</h3>
+            <h3 className="font-medium text-black dark:text-white">
+              <FileTextOutlined className="mr-2" />
+              Billing Information
+            </h3>
           </div>
           <div className="p-6.5">
-            <form>
-              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-full">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Patient Name <span className="text-meta-1">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="patientName"
-                    placeholder="Enter patient's name"
-                    value={reportData.patientName}
-                    onChange={handleInputChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
-                  />
-                </div>
-              </div>
+            {/* Billing Fields */}
+            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+              {renderBillingField('doctorFee', 'Doctor Fee', '500.00', true)}
+              {renderBillingField('additionalMedicinesFee', 'Additional Medicines Fee', '0.00')}
+            </div>
 
-              <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                <div className="w-full xl:w-full">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Doctor Name <span className="text-meta-1">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="doctorName"
-                    placeholder="Enter doctor's name"
-                    value={reportData.doctorName}
-                    onChange={handleInputChange}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
-                  />
-                </div>
-              </div>
-
-              <div className="mb-4.5">
-                <label className="mb-2.5 block text-black dark:text-white">
-                  Diagnosis <span className="text-meta-1">*</span>
+            <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+              {renderBillingField('discount', 'Discount', '0.00')}
+              <div className="w-full xl:w-1/2">
+                <label className="mb-2.5 block text-black dark:text-white font-medium">
+                  Total Amount
                 </label>
-                <textarea
-                  name="diagnosis"
-                  rows={4}
-                  placeholder="Enter diagnosis details"
-                  value={reportData.diagnosis}
-                  onChange={handleInputChange}
-                  className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
-                ></textarea>
-              </div>
-
-              <div className="mb-4.5">
-                <label className="mb-2.5 block text-black dark:text-white">
-                  Prescribed Medicines
-                </label>
-                <Select
-                  mode="multiple"
-                  placeholder="Search and add medicines"
-                  value={selectedMedicines.map((med) => med.medicine)}
-                  onChange={handleMedicineSelect}
-                  showSearch
-                  filterOption={(input, option) =>
-                    String(option?.value ?? '').toLowerCase().includes(input.toLowerCase())
-                  }
-                  className="w-full border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary"
-                >
-                  {availableMedicines.map((medicine) => (
-                    <Option key={medicine} value={medicine}>
-                      {medicine}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="mb-4.5">
-                <label className="mb-2.5 block text-black dark:text-white">
-                  Diagnosed Diseases/Conditions
-                </label>
-                <Select
-                  mode="multiple"
-                  placeholder="Search and add diseases"
-                  value={selectedDiseases}
-                  onChange={(value) => setSelectedDiseases(value)}
-                  showSearch
-                  filterOption={(input, option) =>
-                    String(option?.value ?? '').toLowerCase().includes(input.toLowerCase())
-                  }
-                  className="w-full border-stroke bg-transparent py-3 text-black outline-none transition focus:border-primary active:border-primary"
-                >
-                  {availableDiseases.map((disease) => (
-                    <Option key={disease} value={disease}>
-                      {disease}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
-            </form>
-
-            {selectedMedicines.length > 0 && (
-              <div style={{ marginTop: '20px' }}>
-                <h2 className="mb-4.5 font-medium text-black dark:text-white">Prescribed Medicines</h2>
-                <Table
-                  dataSource={selectedMedicines}
-                  columns={[
-                    { title: 'Medicine Name', dataIndex: 'medicine', key: 'medicine' },
-                    {
-                      title: 'Number of Tablets',
-                      dataIndex: 'tablets',
-                      key: 'tablets',
-                      render: (_, _record, index) => (
-                        <Input
-                          type="number"
-                          value={selectedMedicines[index].tablets}
-                          onChange={(e) => {
-                            const updatedMedicines = [...selectedMedicines];
-                            updatedMedicines[index].tablets = e.target.value;
-                            setSelectedMedicines(updatedMedicines);
-                          }}
-                        />
-                      ),
-                    },
-                    {
-                      title: 'Usage Instructions',
-                      dataIndex: 'usageInstructions',
-                      key: 'usageInstructions',
-                      render: (_, _record, index) => (
-                        <Input
-                          type="text"
-                          value={selectedMedicines[index].usageInstructions}
-                          onChange={(e) => {
-                            const updatedMedicines = [...selectedMedicines];
-                            updatedMedicines[index].usageInstructions = e.target.value;
-                            setSelectedMedicines(updatedMedicines);
-                          }}
-                        />
-                      ),
-                    },
-                  ]}
-                  pagination={false}
+                <Input
+                  value={`₹${billingData.totalAmount.toFixed(2)}`}
+                  size="large"
+                  readOnly
+                  className="bg-gray-100 dark:bg-gray-800 font-bold text-lg"
                 />
               </div>
-            )}
+            </div>
 
-            <div className="p-6.5">
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+            {/* Generate Bill Button */}
+            <div className="flex gap-4">
+              <Button
+                type="primary"
+                icon={<FileTextOutlined />}
+                onClick={generateBill}
+                size="large"
+                className="flex-1"
               >
-                Submit Report
-              </button>
+                Generate Bill
+              </Button>
+              
+              {showInvoice && (
+                <Button
+                  type="default"
+                  icon={<PrinterOutlined />}
+                  onClick={downloadPDF}
+                  loading={loading}
+                  size="large"
+                >
+                  Download PDF
+                </Button>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Invoice Section */}
+        {showInvoice && (
+          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
+              <h3 className="font-medium text-black dark:text-white">
+                Generated Invoice
+              </h3>
+            </div>
+            <div className="p-6.5">
+              {/* Professional Invoice Template */}
+              <div ref={invoiceRef} className="bg-white p-8" style={{ fontFamily: 'Arial, sans-serif' }}>
+                {/* Invoice Header */}
+                <div className="mb-8">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h1 className="text-3xl font-bold text-blue-600 mb-2">KSK HOSPITALS</h1>
+                      <p className="text-gray-600">Premium Healthcare Services</p>
+                      <p className="text-gray-600">📧 info@kskhospitals.com | 📞 +91-XXXXXXXXXX</p>
+                    </div>
+                    <div className="text-right">
+                      <h2 className="text-2xl font-bold text-gray-800 mb-2">INVOICE</h2>
+                      <p className="text-gray-600">Invoice #: {invoiceNumber}</p>
+                      <p className="text-gray-600">Date: {invoiceDate}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Patient Information */}
+                <div className="mb-8 p-4 bg-gray-50 rounded">
+                  <h3 className="font-bold text-gray-800 mb-3">BILL TO:</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p><strong>Patient Name:</strong> {patientInfo?.username || 'N/A'}</p>
+                      <p><strong>Age:</strong> {patientInfo?.age || 'N/A'}</p>
+                      <p><strong>Gender:</strong> {patientInfo?.gender || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p><strong>Phone:</strong> {patientInfo?.phone || 'N/A'}</p>
+                      <p><strong>Doctor:</strong> {appointmentInfo?.doctor?.name || 'N/A'}</p>
+                      <p><strong>Date:</strong> {appointmentInfo ? new Date(appointmentInfo.dateTime).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Services Table */}
+                <table className="w-full mb-8 border-collapse">
+                  <thead>
+                    <tr className="bg-blue-50">
+                      <th className="border border-gray-300 p-3 text-left">Description</th>
+                      <th className="border border-gray-300 p-3 text-right">Amount (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-gray-300 p-3">Doctor Consultation Fee</td>
+                      <td className="border border-gray-300 p-3 text-right">{billingData.doctorFee.toFixed(2)}</td>
+                    </tr>
+                    {billingData.additionalMedicinesFee > 0 && (
+                      <tr>
+                        <td className="border border-gray-300 p-3">Additional Medicines</td>
+                        <td className="border border-gray-300 p-3 text-right">{billingData.additionalMedicinesFee.toFixed(2)}</td>
+                      </tr>
+                    )}
+                    <tr>
+                      <td className="border border-gray-300 p-3">Subtotal</td>
+                      <td className="border border-gray-300 p-3 text-right font-semibold">
+                        {(billingData.doctorFee + billingData.additionalMedicinesFee).toFixed(2)}
+                      </td>
+                    </tr>
+                    {billingData.discount > 0 && (
+                      <tr>
+                        <td className="border border-gray-300 p-3">Discount</td>
+                        <td className="border border-gray-300 p-3 text-right text-red-600">-{billingData.discount.toFixed(2)}</td>
+                      </tr>
+                    )}
+                    <tr className="bg-blue-50">
+                      <td className="border border-gray-300 p-3 font-bold text-lg">TOTAL AMOUNT</td>
+                      <td className="border border-gray-300 p-3 text-right font-bold text-lg">₹{billingData.totalAmount.toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Payment Terms */}
+                <div className="mb-8">
+                  <h3 className="font-bold text-gray-800 mb-2">Payment Terms:</h3>
+                  <p className="text-gray-600">• Payment is due within 30 days of invoice date</p>
+                  <p className="text-gray-600">• Please include invoice number with payment</p>
+                  <p className="text-gray-600">• For queries, contact: billing@kskhospitals.com</p>
+                </div>
+
+                {/* Footer */}
+                <div className="text-center border-t pt-4">
+                  <p className="text-gray-600">Thank you for choosing KSK Hospitals!</p>
+                  <p className="text-sm text-gray-500">This is a computer-generated invoice.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default ReportPage;
+export default ReportForm;

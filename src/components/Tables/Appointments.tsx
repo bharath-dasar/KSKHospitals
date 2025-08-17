@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { message, Table, Tooltip, Modal, DatePicker, Button } from "antd";
+import { message, Tooltip, Modal, DatePicker, Button } from "antd";
 import { useNavigate } from "react-router-dom"; // React Router v6
-import type { ColumnsType } from "antd/es/table";
 import axios from "axios";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import DeleteIcon from "@mui/icons-material/Delete";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -76,6 +74,8 @@ const Appointments: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [fromDate, setFromDate] = useState<Dayjs>(dayjs('2025-08-01T00:00:00'));
   const [toDate, setToDate] = useState<Dayjs>(dayjs('2025-08-31T23:59:59'));
+  const [isPatientTypeModalVisible, setIsPatientTypeModalVisible] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
   const navigate = useNavigate();
 
@@ -188,9 +188,32 @@ const Appointments: React.FC = () => {
   };
 
   const handleRowClick = (record: Appointment) => {
-    navigate(
-      `/reportForm?user=${record.patientIdentifier}&token=${record.appointmentIdentifier}`,
-    );
+    setSelectedAppointment(record);
+    setIsPatientTypeModalVisible(true);
+  };
+
+  const handlePatientTypeSelection = (patientType: 'outpatient' | 'inpatient') => {
+    if (!selectedAppointment) return;
+    
+    setIsPatientTypeModalVisible(false);
+    
+    if (patientType === 'outpatient') {
+      navigate(
+        `/reportForm?user=${selectedAppointment.patientIdentifier}&token=${selectedAppointment.appointmentIdentifier}`,
+      );
+    } else {
+      // Navigate to inpatient admissions page
+      navigate(
+        `/admissionsIPD?user=${selectedAppointment.patientIdentifier}&token=${selectedAppointment.appointmentIdentifier}`,
+      );
+    }
+    
+    setSelectedAppointment(null);
+  };
+
+  const handleModalCancel = () => {
+    setIsPatientTypeModalVisible(false);
+    setSelectedAppointment(null);
   };
 
   const handleSearch = () => {
@@ -364,6 +387,40 @@ const Appointments: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Patient Type Selection Modal */}
+      <Modal
+        title="Select Patient Type"
+        open={isPatientTypeModalVisible}
+        onCancel={handleModalCancel}
+        footer={null}
+        centered
+        width={400}
+      >
+        <div className="py-6">
+          <p className="text-gray-600 dark:text-gray-300 mb-6 text-center">
+            Please select the type of patient for{' '}
+            <strong>{selectedAppointment?.patient.username}</strong>:
+          </p>
+          <div className="flex flex-col gap-4">
+            <Button
+              type="primary"
+              size="large"
+              onClick={() => handlePatientTypeSelection('outpatient')}
+              className="w-full h-12 text-lg"
+            >
+              Out Patient
+            </Button>
+            <Button
+              size="large"
+              onClick={() => handlePatientTypeSelection('inpatient')}
+              className="w-full h-12 text-lg"
+            >
+              In Patient
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
